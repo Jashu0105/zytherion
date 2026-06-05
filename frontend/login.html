@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Zytherion Register</title>
+  <title>Zytherion Login</title>
 </head>
 <body>
 
-<h2>Register</h2>
+<h2>Login</h2>
 
 <input type="email" id="email" placeholder="Email" />
 <br><br>
@@ -13,12 +13,12 @@
 <input type="password" id="password" placeholder="Password" />
 <br><br>
 
-<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
 
-<p>Already have an account? <a href="login.html">Login</a></p>
+<p>Don't have an account? <a href="register.html">Register</a></p>
 
 <script>
-async function register() {
+async function login() {
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -29,7 +29,7 @@ async function register() {
   }
 
   try {
-    const res = await fetch("https://aegisai-backend-ifvc.onrender.com/api/auth/register", {
+    const res = await fetch("https://aegisai-backend-ifvc.onrender.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -43,10 +43,15 @@ async function register() {
     const data = await res.json();
 
     if (res.ok) {
-      alert("Registration successful!");
-      window.location.href = "login.html";
+      alert("Login successful!");
+      
+      // Save the authentication token to localStorage
+      localStorage.setItem("zytherion_token", data.token);
+      
+      // Redirect to your main chat interface
+      window.location.href = "index.html"; 
     } else {
-      alert(data.message || "Registration failed");
+      alert(data.message || "Login failed");
     }
 
   } catch (error) {
