@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zytherion AI - Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Zytherion AI - Gateway</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="auth-wrapper">
   <div class="auth-card">
-    <h2>Zytherion Hub</h2>
-    <p class="auth-subtitle">Welcome back. Authenticate to access the AI core.</p>
+    <h2>Zytherion Terminal</h2>
+    <p class="auth-subtitle">Initialize clearance credentials to access the secure node.</p>
 
     <div class="input-group">
-      <label for="email">Secure Identity (Email)</label>
-      <input type="email" id="email" class="auth-input" placeholder="name@domain.com" autocomplete="off" />
+      <label for="email">Identity Vector (Email)</label>
+      <input type="email" id="email" class="auth-input" placeholder="operator@domain.com" autocomplete="off" />
     </div>
 
     <div class="input-group">
-      <label for="password">Passkey</label>
+      <label for="password">Cryptographic Passkey</label>
       <input type="password" id="password" class="auth-input" placeholder="••••••••" />
     </div>
 
-    <button onclick="login()" class="auth-btn">Initialize Connection</button>
+    <button onclick="login()" class="auth-btn">Establish Connection</button>
 
-    <p class="auth-footer">New pilot? <a href="register.html">Register Terminal</a></p>
+    <p class="auth-footer">Unregistered link? <a href="register.html">Provision Terminal</a></p>
   </div>
 </div>
 
@@ -36,7 +36,7 @@ async function login() {
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("Please enter email and password");
+    alert("Clearance check: Fields cannot be empty.");
     return;
   }
 
@@ -53,10 +53,10 @@ async function login() {
       localStorage.setItem("token", data.token);
       window.location.href = "index.html"; 
     } else {
-      alert(data.message || "Authentication failed");
+      alert(data.message || "Access Denied: Invalid configuration signature.");
     }
   } catch (error) {
-    alert("System core connection error. Try again later.");
+    alert("Connection failure: Host node is completely unreachable.");
   }
 }
 </script>

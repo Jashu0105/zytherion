@@ -1,277 +1,355 @@
 /* ==========================================================================
-   GLOBAL DESIGN VARIABLES & RESET
+   THE ZYTHERION DESIGN SYSTEM (ULTRA-PREMIUM EDITION)
    ========================================================================== */
 :root {
-    --bg-main: #060a13;
-    --bg-surface: rgba(15, 23, 42, 0.6);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    --accent-glow: rgba(59, 130, 246, 0.3);
-    --user-msg-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
-    --bot-msg-bg: rgba(30, 41, 59, 0.7);
+    --bg-dark: #07090e;
+    --card-glass: rgba(13, 20, 35, 0.45);
+    --card-glass-bright: rgba(22, 34, 57, 0.6);
+    --border-glow: rgba(255, 255, 255, 0.06);
+    --border-focus: rgba(99, 102, 241, 0.4);
+    
+    /* Premium Brand Gradients */
+    --brand-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    --user-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    --bot-gradient: rgba(20, 30, 54, 0.65);
+    
+    /* Typography colors */
+    --text-pure: #ffffff;
+    --text-smooth: #e2e8f0;
+    --text-muted: #64748b;
+    --text-neon: #818cf8;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {
-    background: var(--bg-main);
-    color: var(--text-primary);
+    background: var(--bg-dark);
+    color: var(--text-smooth);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     overflow: hidden;
+    position: relative;
+}
+
+/* Luxury Animated Background Grid Mesh */
+body::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 45%),
+        linear-gradient(rgba(255,255,255,0.003) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.003) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    animation: ambientShift 25s infinite linear;
+    z-index: 0;
+}
+
+@keyframes ambientShift {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(2deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
 }
 
 /* ==========================================================================
-   AUTH PAGES STYLE (Login & Register Cards)
+   AUTHENTICATION MODULES (Sleek Glass Deck)
    ========================================================================== */
 .auth-wrapper {
     width: 100%;
-    max-width: 420px;
-    padding: 20px;
+    max-width: 440px;
+    padding: 24px;
+    z-index: 10;
 }
 
 .auth-card {
-    background: var(--bg-surface);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    padding: 40px 30px;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    background: var(--card-glass);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-glow);
+    border-radius: 28px;
+    padding: 45px 35px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle accent lighting at the top of cards */
+.auth-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.4), transparent);
 }
 
 .auth-card h2 {
-    font-size: 28px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
     margin-bottom: 8px;
-    background: var(--accent-gradient);
+    background: var(--brand-primary);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .auth-subtitle {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-size: 14px;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    font-weight: 400;
 }
 
 .input-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     text-align: left;
 }
 
 .input-group label {
     display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-neon);
+    margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .auth-input {
     width: 100%;
-    padding: 14px 16px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    color: var(--text-primary);
+    padding: 15px 18px;
+    background: rgba(5, 8, 16, 0.6);
+    border: 1px solid var(--border-glow);
+    border-radius: 14px;
+    color: var(--text-pure);
     font-size: 15px;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .auth-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 15px var(--accent-glow);
+    border-color: #6366f1;
+    background: rgba(5, 8, 16, 0.85);
+    box-shadow: 0 0 0 4px var(--border-focus);
 }
 
 .auth-btn {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     border: none;
-    border-radius: 12px;
-    background: var(--accent-gradient);
-    color: #ffffff;
-    font-size: 16px;
+    border-radius: 14px;
+    background: var(--brand-primary);
+    color: var(--text-pure);
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     margin-top: 10px;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
 }
 
 .auth-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.6);
+}
+
+.auth-btn:active {
+    transform: translateY(0);
 }
 
 .auth-footer {
-    margin-top: 25px;
-    font-size: 14px;
-    color: var(--text-secondary);
+    margin-top: 28px;
+    font-size: 13.5px;
+    color: var(--text-muted);
 }
 
 .auth-footer a {
-    color: #3b82f6;
+    color: var(--text-neon);
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.2s ease;
 }
 
 .auth-footer a:hover {
+    color: #aebee6;
     text-decoration: underline;
 }
 
 /* ==========================================================================
-   MAIN CHAT INTERFACE (Zytherion APP)
+   MAIN SYSTEM WORKSPACE (Zytherion Terminal Dashboard)
    ========================================================================== */
 .app {
-    width: 1000px;
-    height: 85vh;
-    background: var(--bg-surface);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    width: 1100px;
+    height: 88vh;
+    background: var(--card-glass);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    border: 1px solid var(--border-glow);
+    border-radius: 32px;
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 10;
 }
 
 .header {
-    padding: 20px 30px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border-glow);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(10, 15, 30, 0.4);
+    background: rgba(4, 7, 13, 0.3);
 }
 
 .header h1 {
-    font-size: 22px;
-    font-weight: 600;
-    background: var(--accent-gradient);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: var(--brand-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .header span {
-    font-size: 13px;
+    font-size: 12px;
     color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-    padding: 4px 10px;
-    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.08);
+    padding: 6px 14px;
+    border-radius: 100px;
     border: 1px solid rgba(16, 185, 129, 0.2);
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 #chat-container {
     flex: 1;
-    padding: 30px;
+    padding: 40px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background: rgba(6, 10, 19, 0.2);
+    gap: 20px;
+    background: rgba(2, 4, 8, 0.15);
 }
 
-/* Custom modern scrollbar */
+/* Micro-Smooth Interactive Scrollbar */
 #chat-container::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 #chat-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+}
+#chat-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-/* Message bubbles styling */
+/* High-End Cinematic Messaging Bubbles */
 .message {
-    max-width: 75%;
-    padding: 14px 20px;
-    border-radius: 16px;
-    font-size: 15px;
-    line-height: 1.6;
-    animation: fadeIn 0.3s ease-out forwards;
+    max-width: 72%;
+    padding: 16px 24px;
+    border-radius: 20px;
+    font-size: 15.5px;
+    line-height: 1.65;
+    letter-spacing: 0.1px;
+    transform: translateY(15px);
+    opacity: 0;
+    animation: springEntrance 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .user {
     align-self: flex-end;
-    background: var(--user-msg-bg);
-    color: #ffffff;
+    background: var(--user-gradient);
+    color: var(--text-pure);
     border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 8px 24px -6px rgba(79, 70, 229, 0.4);
 }
 
 .bot {
     align-self: flex-start;
-    background: var(--bot-msg-bg);
-    color: #e2e8f0;
+    background: var(--bot-gradient);
+    color: #f1f5f9;
     border-bottom-left-radius: 4px;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Chat Input Area */
+/* Advanced Floating Input Bar Dock */
 .input-area {
-    padding: 20px 30px;
-    border-top: 1px solid var(--border-color);
+    padding: 24px 40px;
+    border-top: 1px solid var(--border-glow);
     display: flex;
     gap: 16px;
-    background: rgba(10, 15, 30, 0.4);
+    background: rgba(4, 7, 13, 0.3);
+    align-items: center;
 }
 
 #user-input {
     flex: 1;
-    padding: 16px 20px;
-    border-radius: 14px;
-    border: 1px solid var(--border-color);
-    background: rgba(15, 23, 42, 0.9);
-    color: var(--text-primary);
-    font-size: 15px;
+    padding: 18px 24px;
+    border-radius: 18px;
+    border: 1px solid var(--border-glow);
+    background: rgba(5, 8, 16, 0.7);
+    color: var(--text-pure);
+    font-size: 15.5px;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 #user-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 15px var(--accent-glow);
+    border-color: #6366f1;
+    background: rgba(5, 8, 16, 0.9);
+    box-shadow: 0 0 0 4px var(--border-focus);
 }
 
 #send-btn {
-    padding: 0 26px;
-    border-radius: 14px;
+    padding: 18px 32px;
+    border-radius: 18px;
     border: none;
-    background: var(--accent-gradient);
-    color: #ffffff;
+    background: var(--brand-primary);
+    color: var(--text-pure);
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.3);
 }
 
 #send-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 12px 24px -4px rgba(99, 102, 241, 0.5);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+#send-btn:active {
+    transform: translateY(0);
 }
 
-@media (max-width: 1024px) {
-    .app { width: 95%; height: 90vh; }
+@keyframes springEntrance {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsiveness adjustments */
+@media (max-width: 1150px) {
+    .app { width: 94%; height: 90vh; }
+    #chat-container { padding: 25px; }
+    .input-area { padding: 20px 25px; }
 }

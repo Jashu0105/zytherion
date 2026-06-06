@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zytherion AI - Register</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Zytherion AI - Provision Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="auth-wrapper">
   <div class="auth-card">
-    <h2>Create Core Profile</h2>
-    <p class="auth-subtitle">Register a new access point configuration profile.</p>
+    <h2>Provision Profile</h2>
+    <p class="auth-subtitle">Configure an authorized credentials profile for this access point.</p>
 
     <div class="input-group">
-      <label for="email">Identity Email</label>
-      <input type="email" id="email" class="auth-input" placeholder="name@domain.com" autocomplete="off" />
+      <label for="email">Designated Email</label>
+      <input type="email" id="email" class="auth-input" placeholder="operator@domain.com" autocomplete="off" />
     </div>
 
     <div class="input-group">
-      <label for="password">Create Security Passkey</label>
+      <label for="password">Generate Secure Passkey</label>
       <input type="password" id="password" class="auth-input" placeholder="••••••••" />
     </div>
 
-    <button onclick="register()" class="auth-btn">Establish Profile</button>
+    <button onclick="register()" class="auth-btn">Build System Access Profile</button>
 
-    <p class="auth-footer">Profile exists? <a href="login.html">Access Core</a></p>
+    <p class="auth-footer">Already provisioned? <a href="login.html">Decrypt Clearance</a></p>
   </div>
 </div>
 
@@ -36,7 +36,7 @@ async function register() {
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("Fields cannot be left blank.");
+    alert("Provision notice: Credentials cannot be empty.");
     return;
   }
 
@@ -50,13 +50,13 @@ async function register() {
     const data = await res.json();
 
     if (res.ok || data.message === "User registered successfully") {
-      alert("Registration complete! Access terminal opened.");
+      alert("Profile generated successfully. Transferred to authentication port.");
       window.location.href = "login.html";
     } else {
-      alert(data.message || "Registration encountered an anomaly.");
+      alert(data.message || "Provision error: Profile allocation anomaly detected.");
     }
   } catch(e) {
-    alert("Connection interface dropped.");
+    alert("Matrix interface dropped: Server did not respond.");
   }
 }
 </script>
