@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zytherion AI - Provision Terminal</title>
+  <title>Zytherion Registration</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,22 +11,22 @@
 
 <div class="auth-wrapper">
   <div class="auth-card">
-    <h2>Provision Profile</h2>
-    <p class="auth-subtitle">Configure an authorized credentials profile for this access point.</p>
+    <h2>Zytherion Registration</h2>
+    <p class="auth-subtitle">Create a secure profile to start initializing your customized AI interface.</p>
 
     <div class="input-group">
-      <label for="email">Designated Email</label>
-      <input type="email" id="email" class="auth-input" placeholder="operator@domain.com" autocomplete="off" />
+      <label for="email">Email Address</label>
+      <input type="email" id="email" class="auth-input" placeholder="name@example.com" autocomplete="off" />
     </div>
 
     <div class="input-group">
-      <label for="password">Generate Secure Passkey</label>
+      <label for="password">Create Password</label>
       <input type="password" id="password" class="auth-input" placeholder="••••••••" />
     </div>
 
-    <button onclick="register()" class="auth-btn">Build System Access Profile</button>
+    <button onclick="register()" class="auth-btn">Create Account</button>
 
-    <p class="auth-footer">Already provisioned? <a href="login.html">Decrypt Clearance</a></p>
+    <p class="auth-footer">Already have an account? <a href="login.html">Sign in here</a></p>
   </div>
 </div>
 
@@ -36,7 +36,7 @@ async function register() {
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("Provision notice: Credentials cannot be empty.");
+    alert("Please complete all registration fields.");
     return;
   }
 
@@ -50,13 +50,13 @@ async function register() {
     const data = await res.json();
 
     if (res.ok || data.message === "User registered successfully") {
-      alert("Profile generated successfully. Transferred to authentication port.");
+      alert("Registration successful! Redirecting to login window.");
       window.location.href = "login.html";
     } else {
-      alert(data.message || "Provision error: Profile allocation anomaly detected.");
+      alert(data.message || "Registration encountered an issue.");
     }
   } catch(e) {
-    alert("Matrix interface dropped: Server did not respond.");
+    alert("Connection error. Could not reach registration terminal server.");
   }
 }
 </script>

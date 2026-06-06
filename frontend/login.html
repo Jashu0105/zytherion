@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zytherion AI - Gateway</title>
+  <title>Zytherion Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,22 +11,22 @@
 
 <div class="auth-wrapper">
   <div class="auth-card">
-    <h2>Zytherion Terminal</h2>
-    <p class="auth-subtitle">Initialize clearance credentials to access the secure node.</p>
+    <h2>Zytherion Login</h2>
+    <p class="auth-subtitle">Welcome back. Enter your credentials to access your workspace.</p>
 
     <div class="input-group">
-      <label for="email">Identity Vector (Email)</label>
-      <input type="email" id="email" class="auth-input" placeholder="operator@domain.com" autocomplete="off" />
+      <label for="email">Email Address</label>
+      <input type="email" id="email" class="auth-input" placeholder="name@example.com" autocomplete="off" />
     </div>
 
     <div class="input-group">
-      <label for="password">Cryptographic Passkey</label>
+      <label for="password">Password</label>
       <input type="password" id="password" class="auth-input" placeholder="••••••••" />
     </div>
 
-    <button onclick="login()" class="auth-btn">Establish Connection</button>
+    <button onclick="login()" class="auth-btn">Sign In</button>
 
-    <p class="auth-footer">Unregistered link? <a href="register.html">Provision Terminal</a></p>
+    <p class="auth-footer">Don't have an account? <a href="register.html">Register here</a></p>
   </div>
 </div>
 
@@ -36,7 +36,7 @@ async function login() {
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("Clearance check: Fields cannot be empty.");
+    alert("Please enter both your email and password.");
     return;
   }
 
@@ -53,10 +53,10 @@ async function login() {
       localStorage.setItem("token", data.token);
       window.location.href = "index.html"; 
     } else {
-      alert(data.message || "Access Denied: Invalid configuration signature.");
+      alert(data.message || "Login failed. Please check your credentials.");
     }
   } catch (error) {
-    alert("Connection failure: Host node is completely unreachable.");
+    alert("Unable to connect to the server. Please try again later.");
   }
 }
 </script>
