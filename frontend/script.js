@@ -27,8 +27,11 @@ async function sendMessage() {
 
     try {
         const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";
+            return;
+        }
 
-        // Fixed the incorrect fetch call to correctly target the chat endpoint
         const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: {
@@ -71,8 +74,9 @@ async function sendMessage() {
 sendBtn.addEventListener("click", sendMessage);
 
 // Enter key support
-userInput.addEventListener("keypress", function (e) {
+userInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
+        e.preventDefault();
         sendMessage();
     }
 });
