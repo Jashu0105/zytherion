@@ -208,7 +208,11 @@ app.post("/chat", authenticateToken, async (req, res) => {
     const reply = aiResponse.data?.choices?.[0]?.message?.content || "No response from AI.";
     conversation.messages.push({ role: "assistant", content: reply });
     await conversation.save();
-    res.json({ reply });
+   res.json({ 
+      reply: reply,
+      botReply: reply,
+      message: reply 
+    });
   } catch (error) {
     console.error("FULL ERROR:", error.response?.data || error.message);
     res.status(500).json({ error: error.response?.data || error.message });
