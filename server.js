@@ -185,14 +185,14 @@ app.post("/chat", authenticateToken, async (req, res) => {
       dynamicUserContent = `<LIVE_WEB_DATA_SOURCE>\n${searchResults}\n</LIVE_WEB_DATA_SOURCE>\n\nUSER_QUESTION: ${message}`;
     }
 
-    const aiResponse = await axios.post(
+  const aiResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "openai/gpt-4o-mini",
+        model: "google/gemini-2.5-flash",  // <-- CHANGE THIS LINE HERE
         messages: [
           { role: "system", content: dynamicSystemPrompt },
-          ...recentMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
-          { role: "user", content: dynamicUserContent }
+          ...recentMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })), 
+          { role: "user", content: dynamicUserContent } 
         ]
       },
       {
