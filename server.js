@@ -209,8 +209,14 @@ app.post("/chat", authenticateToken, async (req, res) => {
     }
     console.log("--- END MULTI-ENGINE SEARCH DEBUG ---");
 
-    /* --- OPENROUTER AI ENGINE CALL --- */
+/* --- OPENROUTER AI ENGINE CALL --- */
     const dynamicSystemPrompt = generateSystemPrompt();
+
+    // 1. Build a highly visible context block if live search data was successfully fetched
+    let dynamicUserContent = message;
+    if (searchResults) {
+      dynamicUserContent = `CONTEXT SEARCH DATA FROM LIVE WEB:\n${searchResults}\n\nUSER QUESTION: ${message}\n\nInstructions: Use the live context search data above to provide an accurate answer for June 2026. If the search context contradicts your internal knowledge base (like who a current CEO is, current stock prices, or movie statuses), prioritize the live web search context data as absolute truth.`;
+    }
 
     const aiResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -218,8 +224,8 @@ app.post("/chat", authenticateToken, async (req, res) => {
         model: "openai/gpt-4o-mini",  
         messages: [
           { role: "system", content: dynamicSystemPrompt },
-          ...(searchResults ? [{ role: "system", content: `CURRENT WEB DATA SNIPPETS:\n${searchResults}` }] : []),
-          ...recentMessages.map(m => ({ role: m.role, content: m.content }))
+          ...recentMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })), // Past conversation thread
+          { role: "user", content: dynamicUserContent } // Current question packed with live search data
         ]
       },
       {
@@ -232,16 +238,14 @@ app.post("/chat", authenticateToken, async (req, res) => {
       }
     );
 
-    const reply = aiResponse.data?.choices?.[0]?.message?.content || "No response from AI.";
-
-    conversation.messages.push({ role: "assistant", content: reply });
+    const botReply = aiResponse.data?.choices?.[0]?.message?.content || "Sorry, I could not generate a response.";
+    conversation.messages.push({ role: "assistant", content: botReply });
     await conversation.save();
 
-    res.json({ reply });
-
+    res.json({ reply: botReply });
   } catch (error) {
-    console.error("FULL ERROR:", error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || error.message });
+    console.error("CHAT ERROR:", error);
+    res.status(500).json({ message: "Chat error", error: error.message });
   }
 });
 
