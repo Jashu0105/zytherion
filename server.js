@@ -145,7 +145,7 @@ app.post("/chat", authenticateToken, async (req, res) => {
     conversation.messages.push({ role: "user", content: message });
     const recentMessages = conversation.messages.slice(-10);
 
-    /* --- REAL-TIME SEARCH INTENT DETECTION (TAVILY W/ SERPER FAILOVER) --- */
+   /* --- REAL-TIME SEARCH INTENT DETECTION (TAVILY W/ SERPER FAILOVER) --- */
     let searchResults = "";
     const realTimeKeywords = ['price', 'stock', 'today', 'now', 'weather', 'news', 'date', 'current'];
     const needsLiveContext = realTimeKeywords.some(kw => message.toLowerCase().includes(kw));
@@ -153,13 +153,20 @@ app.post("/chat", authenticateToken, async (req, res) => {
     console.log("--- START MULTI-ENGINE SEARCH DEBUG ---");
     
     if (needsLiveContext) {
+      
+      // ==========================================
+      // PLACE IT HERE: Create the filtered query string
+      // ==========================================
+      const secureQuery = `${message} latest news official 2025 2026`;
+      console.log(`Optimizing search matrix query parameters: "${secureQuery}"`);
+
       // Strategy A: Attempt high-priority Tavily optimization first
       if (process.env.TAVILY_API_KEY) {
         console.log("Live intent detected. Attempting primary engine [Tavily]...");
         try {
           const tavilyResponse = await axios.post("https://api.tavily.com/search", {
             api_key: process.env.TAVILY_API_KEY,
-            query: message,
+            query: secureQuery, // <-- CHANGE THIS from 'message' to 'secureQuery'
             search_depth: "basic"
           });
           
@@ -180,7 +187,7 @@ app.post("/chat", authenticateToken, async (req, res) => {
         try {
           const serperResponse = await axios.post(
             "https://google.serper.dev/search",
-            { q: message },
+            { q: secureQuery }, // <-- CHANGE THIS from 'message' to 'secureQuery'
             {
               headers: {
                 "X-API-KEY": process.env.SERPER_API_KEY,
