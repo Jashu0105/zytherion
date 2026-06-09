@@ -43,11 +43,15 @@ function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied" });
+    console.log("Auth Blocked: Missing Token");
+    return res.status(401).json({ message: "Access denied. Missing Token." });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: "Invalid token" });
+    if (err) {
+      console.log("Auth Blocked: Invalid Sign/Signature Key");
+      return res.status(403).json({ message: "Invalid token structure." });
+    }
     req.user = user;
     next();
   });
@@ -78,6 +82,7 @@ app.post("/api/auth/register", async (req, res) => {
     if (!email || !password) return res.status(400).json({ message: "Email and password required" });
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
@@ -92,8 +97,10 @@ app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({ token });
   } catch (error) {
@@ -125,8 +132,9 @@ app.post("/chat", authenticateToken, async (req, res) => {
     const needsLiveContext = realTimeKeywords.some(kw => message.toLowerCase().includes(kw));
 
     if (needsLiveContext) {
-      const secureQuery = `${message} current verified news updates 2025 2026`;
+      const secureQuery = `${message} latest official fact checked news 2025 2026`;
       
+      // Strategy A: Tavily Optimization
       if (process.env.TAVILY_API_KEY) {
         try {
           const tavilyResponse = await axios.post("https://api.tavily.com/search", {
@@ -138,12 +146,14 @@ app.post("/chat", authenticateToken, async (req, res) => {
             searchResults = tavilyResponse.data.results
               .map(r => `Title: ${r.title}\nContent: ${r.content}\nSource: ${r.url}`)
               .join("\n\n");
+            console.log("Search Matrix successfully generated via Tavily.");
           }
         } catch (tavilyErr) {
-          console.warn("Primary Tavily layer failed, falling back to Serper...");
+          console.warn("Tavily matrix layer hit credit boundary or error. Diverting to Serper layer...");
         }
       }
 
+      // Strategy B: Serper/Google Backup Failover
       if (!searchResults && process.env.SERPER_API_KEY) {
         try {
           const serperResponse = await axios.post(
@@ -156,9 +166,10 @@ app.post("/chat", authenticateToken, async (req, res) => {
           const results = serperResponse.data?.organic?.slice(0, 3);
           if (results?.length) {
             searchResults = results.map(r => `Title: ${r.title}\nSnippet: ${r.snippet}\nSource: ${r.link}`).join("\n\n");
+            console.log("Search Matrix successfully recovered via Serper.");
           }
         } catch (serperErr) {
-          console.error("Secondary search engine failed.");
+          console.error("Secondary search engine structural boundary reached.");
         }
       }
     }
@@ -207,6 +218,7 @@ USER_QUESTION: ${message}`;
     conversation.messages.push({ role: "assistant", content: reply });
     await conversation.save();
 
+    // Send multi-format responses to ensure complete frontend compatibility
     res.json({ 
       reply: reply,
       botReply: reply,
