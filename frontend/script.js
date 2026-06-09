@@ -39,6 +39,17 @@ async function sendMessage() {
 });
 
 const data = await response.json();
+// Grab the text response out of any format the server returns
+const aiResponseText = data.reply || data.botReply || data.message || data.content;
+
+if (aiResponseText) {
+    // Paste the AI's reply directly into your UI layout text nodes here
+    appendMessageToChatBubble("assistant", aiResponseText); 
+} else {
+    // If absolutely nothing came back, show a fallback message
+    appendMessageToChatBubble("assistant", "Error: Unexpected response format.");
+    console.error("Server data structure mismatch. Received:", data);
+}
 
         if (response.status === 401 || response.status === 403) {
             // Token is invalid or expired
