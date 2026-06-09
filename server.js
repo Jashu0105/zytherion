@@ -1,5 +1,5 @@
 /* ================= IMPORTS & SETUP ================= */
-require("dotenv").config(); // Essential Line 1: Loads variables immediately
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -54,7 +54,6 @@ function authenticateToken(req, res, next) {
 }
 
 /* ================= HELPER FUNCTIONS ================= */
-// Structures temporal rules so Zytherion never gets stuck in the past
 function generateSystemPrompt() {
   const now = new Date();
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' };
@@ -73,54 +72,29 @@ CRITICAL CONTEXT & KNOWLEDGE OVERRIDE:
 }
 
 /* ================= AUTH ROUTES ================= */
-
-// REGISTER
 app.post("/api/auth/register", async (req, res) => {
   try {
-    console.log("REGISTER REQUEST:", req.body);
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
-    }
-
+    if (!email || !password) return res.status(400).json({ message: "Email and password required" });
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
-    
-    console.log("USER CREATED:", email);
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
     res.status(500).json({ message: "Registration error", error: error.message });
   }
 });
 
-// LOGIN
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
+    if (!user) return res.status(400).json({ message: "User not found" });
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({ token });
   } catch (error) {
     res.status(500).json({ message: "Login error" });
@@ -128,67 +102,89 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 /* ================= CHAT ROUTE ================= */
-
 app.post("/chat", authenticateToken, async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.user.id;
 
-    if (!message) return res.status(400).json({ reply: "Message required." });
+    if (!message) {
+      return res.status(400).json({ reply: "Message required." });
+    }
 
     let conversation = await Conversation.findOne({ userId });
-    if (!conversation) conversation = new Conversation({ userId, messages: [] });
+    if (!conversation) {
+      conversation = new Conversation({ userId, messages: [] });
+    }
 
     conversation.messages.push({ role: "user", content: message });
     const recentMessages = conversation.messages.slice(-10);
 
-    // live search (if triggered)
+    /* --- REAL-TIME SEARCH INTENT DETECTION (TAVILY W/ SERPER FAILOVER) --- */
     let searchResults = "";
     const realTimeKeywords = ['price', 'stock', 'today', 'now', 'weather', 'news', 'date', 'current', 'cutoff', 'knowledge', 'ceo', 'match', 'cup', 'launched'];
     const needsLiveContext = realTimeKeywords.some(kw => message.toLowerCase().includes(kw));
 
     if (needsLiveContext) {
       const secureQuery = `${message} latest news official 2025 2026`;
-      try {
-        if (process.env.TAVILY_API_KEY) {
+      if (process.env.TAVILY_API_KEY) {
+        try {
           const tavilyResponse = await axios.post("https://api.tavily.com/search", {
             api_key: process.env.TAVILY_API_KEY,
-            query: secureQuery,
+            query: secureQuery, 
             search_depth: "basic"
           });
           if (tavilyResponse.data?.results?.length) {
-            searchResults = tavilyResponse.data.results.map(r => `Title: ${r.title}\nContent: ${r.content}\nSource: ${r.url}`).join("\n\n");
+            searchResults = tavilyResponse.data.results
+              .map(r => `Title: ${r.title}\nContent: ${r.content}\nSource: ${r.url}`)
+              .join("\n\n");
           }
+        } catch (tavilyErr) {
+          console.warn("Primary Tavily layer failed, falling back to Serper...");
         }
-      } catch (e) {
-        console.warn('Tavily failed:', e.message);
       }
 
       if (!searchResults && process.env.SERPER_API_KEY) {
         try {
           const serperResponse = await axios.post(
             "https://google.serper.dev/search",
-            { q: secureQuery },
-            { headers: { "X-API-KEY": process.env.SERPER_API_KEY, "Content-Type": "application/json" } }
+            { q: secureQuery }, 
+            {
+              headers: { "X-API-KEY": process.env.SERPER_API_KEY, "Content-Type": "application/json" }
+            }
           );
           const results = serperResponse.data?.organic?.slice(0, 3);
-          if (results?.length) searchResults = results.map(r => `Title: ${r.title}\nSnippet: ${r.snippet}\nSource: ${r.link}`).join("\n\n");
-        } catch (e) {
-          console.warn('Serper failed:', e.message);
+          if (results?.length) {
+            searchResults = results.map(r => `Title: ${r.title}\nSnippet: ${r.snippet}\nSource: ${r.link}`).join("\n\n");
+          }
+        } catch (serperErr) {
+          console.error("Secondary search engine failed as well.");
         }
       }
     }
 
+    /* --- OPENROUTER AI ENGINE CALL --- */
     const dynamicSystemPrompt = generateSystemPrompt();
     let dynamicUserContent = message;
+    
     if (searchResults) {
-      dynamicUserContent = `<LIVE_WEB_DATA_SOURCE>\n${searchResults}\n</LIVE_WEB_DATA_SOURCE>\n\nUSER_QUESTION: ${message}`;
+      dynamicUserContent = `<LIVE_WEB_DATA_SOURCE>
+The following documentation represents the exact, verified truth on the live internet as of today, June 2026. Analyze it meticulously before answering:
+${searchResults}
+</LIVE_WEB_DATA_SOURCE>
+
+<CRITICAL_DIRECTIVES>
+1. Cross-reference the USER_QUESTION against the text inside <LIVE_WEB_DATA_SOURCE>.
+2. If your internal pre-trained memory suggests an event hasn't happened yet but the live web documentation confirms it occurred between 2024 and 2026, you MUST treat your internal training memory as completely outdated and false.
+3. Prioritize exact proper nouns, official titles, and specific match results mentioned in the live text over your own assumptions or guesses.
+</CRITICAL_DIRECTIVES>
+
+USER_QUESTION: ${message}`;
     }
 
-  const aiResponse = await axios.post(
+    const aiResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "google/gemini-2.5-flash",  // <-- CHANGE THIS LINE HERE
+        model: "openai/gpt-4o-mini",  
         messages: [
           { role: "system", content: dynamicSystemPrompt },
           ...recentMessages.slice(0, -1).map(m => ({ role: m.role, content: m.content })), 
@@ -199,23 +195,27 @@ app.post("/chat", authenticateToken, async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://zytherionai-topaz.vercel.app",
+          "HTTP-Referer": "https://zytherionai-topaz.vercel.app", 
           "X-Title": "Zytherion"
         }
       }
     );
 
     const reply = aiResponse.data?.choices?.[0]?.message?.content || "No response from AI.";
+
     conversation.messages.push({ role: "assistant", content: reply });
     await conversation.save();
-   res.json({ 
+
+    // FIXED PACKAGING: Sends back every possible format style to ensure the frontend script reads it smoothly!
+    res.json({ 
       reply: reply,
       botReply: reply,
       message: reply 
     });
+
   } catch (error) {
-    console.error("FULL ERROR:", error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || error.message });
+    console.error("FULL CHAT ROUTE ERROR:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

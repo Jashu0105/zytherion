@@ -31,26 +31,30 @@ async function sendMessage() {
             window.location.href = "login.html";
             return;
         }
-
-       const response = await fetch("http://localhost:3000/chat", {
+// Locate where your script fetches from the server backend
+const response = await fetch("http://localhost:3000/chat", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: userInput })
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}` // if using JWT
+    },
+    body: JSON.stringify({ message: userInputText })
 });
 
 const data = await response.json();
-// Grab the text response out of any format the server returns
-const aiResponseText = data.reply || data.botReply || data.message || data.content;
 
-if (aiResponseText) {
-    // Paste the AI's reply directly into your UI layout text nodes here
-    appendMessageToChatBubble("assistant", aiResponseText); 
+// ==========================================
+// REPLACE YOUR CRASHING RESPONSE PARSER WITH THIS:
+// ==========================================
+const finalResponseText = data.reply || data.botReply || data.message || data.error;
+
+if (finalResponseText) {
+    // Note: Change 'appendMessage' to match your exact function name for adding text bubbles!
+    appendMessage("assistant", finalResponseText); 
 } else {
-    // If absolutely nothing came back, show a fallback message
-    appendMessageToChatBubble("assistant", "Error: Unexpected response format.");
-    console.error("Server data structure mismatch. Received:", data);
+    appendMessage("assistant", "Error: Unexpected response format.");
+    console.error("Data tracking mismatched. Received from server:", data);
 }
-
         if (response.status === 401 || response.status === 403) {
             // Token is invalid or expired
             localStorage.removeItem("token");
