@@ -1,75 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zytherion Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zytherion Login</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0f19; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { background: #131a26; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: center; border: 1px solid #1e293b; }
+        h2 { color: #d1a85c; margin-bottom: 8px; font-size: 28px; }
+        p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; color: #94a3b8; margin-bottom: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; background: #0b0f19; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 16px; transition: 0.3s; }
+        input:focus { outline: none; border-color: #d1a85c; }
+        .btn { width: 100%; padding: 12px; background: #d1a85c; border: none; border-radius: 6px; color: #0b0f19; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { background: #b89146; }
+        .switch-route { margin-top: 20px; font-size: 14px; color: #64748b; }
+        .switch-route a { color: #d1a85c; text-decoration: none; }
+        .switch-route a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <h2>Zytherion Login</h2>
-    <p class="auth-subtitle">Welcome back. Enter your credentials to access your workspace.</p>
+    <div class="login-container">
+        <h2>Zytherion Login</h2>
+        <p>Welcome back. Enter your credentials to access your workspace.</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
 
-    <form id="login-form">
-      <div class="input-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" class="auth-input" placeholder="name@example.com" autocomplete="email" required />
-      </div>
+        <div class="switch-route">
+            Don't have an account? <a href="register.html">Register here</a>
+        </div>
+    </div>
 
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" class="auth-input" placeholder="••••••••" autocomplete="current-password" required />
-      </div>
+    <script>
+        // Production vs Local Environment Router
+        const LOGIN_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+            ? "http://localhost:3000/api/auth/login"
+            : "https://aegisai-backend-ifvc.onrender.com/api/auth/login";
 
-      <button type="submit" class="auth-btn">Sign In</button>
-    </form>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-    <p class="auth-footer">Don't have an account? <a href="register.html">Register here</a></p>
-  </div>
-</div>
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
 
-<script>
-document.getElementById("login-form").addEventListener("submit", function (event) {
-  event.preventDefault();
-  login();
-});
+            try {
+                const response = await fetch(LOGIN_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                });
 
-async function login() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+                const data = await response.json();
 
-  if (!email || !password) {
-    alert("Please enter both your email and password.");
-    return;
-  }
+                if (response.ok) {
+                    // Store the active token payload safely
+                    localStorage.setItem("token", data.token);
+                    // Force redirect straight to your main application interface
+                    window.location.href = "index.html"; 
+                } else {
+                    alert(data.message || "Invalid credentials. Please try again.");
+                }
 
-  try {
-   // Replace your old fetch line with this:
-const response = await fetch(LOGIN_URL, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ email: emailValue, password: passwordValue }) 
-    // Note: Keep your original variable names inside JSON.stringify if they aren't emailValue/passwordValue!
-});
-
-    const data = await response.json();
-
-    if (response.ok) {
-      localStorage.setItem("token", data.token);
-      window.location.href = "index.html"; 
-    } else {
-      alert(data.message || "Login failed. Please check your credentials.");
-    }
-  } catch (error) {
-    alert("Unable to connect to the server. Please verify your node process is running on port 3000.");
-  }
-}
-</script>
+            } catch (error) {
+                console.error("Authentication Error Details:", error);
+                alert("Unable to connect to the server. Your live engine backend might be sleeping or spinning up on Render. Give it a minute and try again.");
+            }
+        });
+    </script>
 </body>
 </html>
