@@ -3,9 +3,9 @@ const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
 // Dynamically toggles between local testing and your live Render deployment
-const BACKEND_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000/chat"
-    : "https://aegisai-backend-ifvc.onrender.com/chat";
+const LOGIN_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/auth/login"
+    : "https://aegisai-backend-ifvc.onrender.com/api/auth/login";
 
 async function sendMessage() {
     const message = userInput.value.trim();

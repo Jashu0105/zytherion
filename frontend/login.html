@@ -48,16 +48,19 @@ async function login() {
   }
 
   try {
-    // SYNCHRONIZED DIRECT TO ENGINE TERMINAL
-    const res = await fetch("http://localhost:3000/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+   // Replace your old fetch line with this:
+const response = await fetch(LOGIN_URL, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email: emailValue, password: passwordValue }) 
+    // Note: Keep your original variable names inside JSON.stringify if they aren't emailValue/passwordValue!
+});
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (res.ok) {
+    if (response.ok) {
       localStorage.setItem("token", data.token);
       window.location.href = "index.html"; 
     } else {
