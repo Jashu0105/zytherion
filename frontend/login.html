@@ -286,7 +286,7 @@
     </div>
 
     <script>
-        // Core Visual State Management (Theme Sync Engine)
+        // Core Visual State Management
         const themeToggleBtn = document.getElementById("themeToggleBtn");
         const savedTheme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -298,7 +298,7 @@
             localStorage.setItem("theme", newTheme);
         });
 
-        // Interactive Passkey Visibility Field Router
+        // Passkey Visibility Controller
         const passwordInput = document.getElementById("password");
         const togglePasswordBtn = document.getElementById("togglePassword");
         const eyeIcon = document.getElementById("eyeIcon");
@@ -324,10 +324,13 @@
             
             errorBox.style.display = "none";
 
-            // Production Absolute URL Mapping Strategy targeting Render API directly
-            const AUTH_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:3000/login"
-                : "https://aegisai-backend-ifvc.onrender.com/login"; 
+            // STRATEGY: Switch the commented blocks below depending on your backend configuration definitions.
+            
+            // CONFIGURATION VARIANT A: Standard API route endpoint
+            const AUTH_URL = "https://aegisai-backend-ifvc.onrender.com/api/login";
+
+            // CONFIGURATION VARIANT B: Root fallback path endpoint (Uncomment below if Variant A gives a 404)
+            // const AUTH_URL = "https://aegisai-backend-ifvc.onrender.com/";
 
             try {
                 const response = await fetch(AUTH_URL, {
@@ -336,17 +339,23 @@
                     body: JSON.stringify({ email, password })
                 });
 
+                // Intercept any non-JSON HTML payloads cleanly before parsing
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Mismatched backend data route configuration. Try switching the AUTH_URL variant inside line 230 of your login.html file.");
+                }
+
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || "Access denied. Invalid credentials sequence.");
+                    throw new Error(data.message || "Access denied. Invalid credentials string match.");
                 }
 
                 localStorage.setItem("token", data.token);
                 window.location.href = "index.html";
 
             } catch (error) {
-                errorBox.innerText = "Access Validation Error: " + error.message;
+                errorBox.innerText = error.message;
                 errorBox.style.display = "block";
                 console.error("Auth Exception Layer Error:", error);
             }
