@@ -2,8 +2,10 @@ const chatContainer = document.getElementById("chat-container");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-// Explicitly pointing to your active local machine engine door
-const BACKEND_URL = "http://localhost:3000/chat";
+// Dynamically toggles between local testing and your live Render deployment
+const BACKEND_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/chat"
+    : "https://aegisai-backend-ifvc.onrender.com/chat";
 
 async function sendMessage() {
     const message = userInput.value.trim();
@@ -31,7 +33,7 @@ async function sendMessage() {
             return;
         }
 
-        // 3. Forward the message block string directly to local server
+        // 3. Forward the message block string directly to server
         const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: {
@@ -67,9 +69,9 @@ async function sendMessage() {
 
         const errorDiv = document.createElement("div");
         errorDiv.classList.add("message", "bot");
-        errorDiv.innerText = "Connection error. Ensure your local server is running.";
+        errorDiv.innerText = "Connection error. Unable to reach the Zytherion engine.";
         chatContainer.appendChild(errorDiv);
-        console.error("Local Workspace Error:", error);
+        console.error("Engine Connection Error:", error);
     }
 }
 
