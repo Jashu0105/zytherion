@@ -1,101 +1,38 @@
-<svg
-  viewBox="0 0 400 400"
-  xmlns="http://www.w3.org/2000/svg"
-  style={{ display: "block" }}
->
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient
-      id="gT1"
-      gradientUnits="userSpaceOnUse"
-      x1="320"
-      y1="80"
-      x2="80"
-      y2="148"
-    >
+    <linearGradient id="gT1" gradientUnits="userSpaceOnUse" x1="320" y1="80" x2="80" y2="148">
       <stop offset="0%" stop-color="#f8e098" />
       <stop offset="100%" stop-color="#d4a85c" />
     </linearGradient>
-
-    <linearGradient
-      id="gT2"
-      gradientUnits="userSpaceOnUse"
-      x1="80"
-      y1="80"
-      x2="320"
-      y2="148"
-    >
+    <linearGradient id="gT2" gradientUnits="userSpaceOnUse" x1="80" y1="80" x2="320" y2="148">
       <stop offset="0%" stop-color="#d8ae62" />
       <stop offset="100%" stop-color="#b08a3a" />
     </linearGradient>
-
-    <linearGradient
-      id="gD"
-      gradientUnits="userSpaceOnUse"
-      x1="320"
-      y1="148"
-      x2="80"
-      y2="252"
-    >
+    <linearGradient id="gD" gradientUnits="userSpaceOnUse" x1="320" y1="148" x2="80" y2="252">
       <stop offset="0%" stop-color="#e4bc6a" />
       <stop offset="100%" stop-color="#9e7632" />
     </linearGradient>
-
-    <linearGradient
-      id="gB1"
-      gradientUnits="userSpaceOnUse"
-      x1="320"
-      y1="252"
-      x2="80"
-      y2="320"
-    >
+    <linearGradient id="gB1" gradientUnits="userSpaceOnUse" x1="320" y1="252" x2="80" y2="320">
       <stop offset="0%" stop-color="#cc9e48" />
       <stop offset="100%" stop-color="#96702c" />
     </linearGradient>
-
-    <linearGradient
-      id="gB2"
-      gradientUnits="userSpaceOnUse"
-      x1="80"
-      y1="252"
-      x2="320"
-      y2="320"
-    >
+    <linearGradient id="gB2" gradientUnits="userSpaceOnUse" x1="80" y1="252" x2="320" y2="320">
       <stop offset="0%" stop-color="#b48840" />
       <stop offset="100%" stop-color="#7a5420" />
     </linearGradient>
-
-    <linearGradient
-      id="gEdge"
-      gradientUnits="userSpaceOnUse"
-      x1="80"
-      y1="80"
-      x2="320"
-      y2="320"
-    >
+    <linearGradient id="gEdge" gradientUnits="userSpaceOnUse" x1="80" y1="80" x2="320" y2="320">
       <stop offset="0%" stop-color="#fff6cc" stop-opacity="0.32" />
       <stop offset="100%" stop-color="#d1a85c" stop-opacity="0" />
     </linearGradient>
   </defs>
-
   <polygon points="80,80 320,80 320,148" fill="url(#gT1)" />
   <polygon points="80,80 320,148 80,148" fill="url(#gT2)" />
-
   <polygon points="80,148 320,148 80,252" fill="url(#gD)" />
-
   <polygon points="80,252 320,252 320,320" fill="url(#gB1)" />
   <polygon points="80,252 320,320 80,320" fill="url(#gB2)" />
-
   <line x1="80" y1="80" x2="320" y2="148" stroke="url(#gEdge)" stroke-width="1.2" />
   <line x1="80" y1="148" x2="320" y2="148" stroke="url(#gEdge)" stroke-width="0.9" stroke-opacity="0.35" />
   <line x1="80" y1="252" x2="320" y2="252" stroke="url(#gEdge)" stroke-width="0.9" stroke-opacity="0.35" />
   <line x1="80" y1="252" x2="320" y2="320" stroke="url(#gEdge)" stroke-width="1.2" />
-
-  <polyline
-    points="80,80 320,80 320,148"
-    fill="none"
-    stroke="#fff8e0"
-    stroke-width="1.5"
-    stroke-opacity="0.16"
-    stroke-linejoin="miter"
-  />
+  <polyline points="80,80 320,80 320,148" fill="none" stroke="#fff8e0" stroke-width="1.5" stroke-opacity="0.16" stroke-linejoin="miter" />
 </svg>
