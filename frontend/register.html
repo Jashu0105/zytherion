@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI — Terminal Registration</title>
+    <title>Zytherion AI — Registration</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -337,9 +337,10 @@
             statusBox.className = "msg-alert";
             statusBox.style.display = "none";
 
-            const REGISTER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:3000/register"
-                : "https://aegisai-backend-ifvc.onrender.com/"; 
+            // Target the explicit API sub-route node
+const REGISTER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/register"
+    : "https://aegisai-backend-ifvc.onrender.com/api/register"; // <--- Updated path
 
             try {
                 const response = await fetch(REGISTER_URL, {

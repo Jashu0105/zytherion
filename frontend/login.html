@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI — Authentication</title>
+    <title>Zytherion AI — Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -325,10 +325,10 @@
             errorBox.style.display = "none";
 
             // Corrected Endpoint Routing Path System targeting the base deployment
-            const AUTH_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:3000/login"
-                : "https://aegisai-backend-ifvc.onrender.com/"; 
-
+            // Target the explicit API sub-route node
+const AUTH_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/login"
+    : "https://aegisai-backend-ifvc.onrender.com/api/login"; // <--- Updated path
             try {
                 const response = await fetch(AUTH_URL, {
                     method: "POST",
