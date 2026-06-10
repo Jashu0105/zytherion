@@ -24,7 +24,16 @@ function renderSavedLogs() {
     
     // Default system boot greeting if local logs are completely clean
     if (activeChatHistory.length === 0) {
-        appendChatBubble("Hello. Core operations online. Local storage tracking systems active. How can I assist you today?", "bot", false);
+        appendChatBubble(`🚀 ZYTHERION
+
+The Next Generation of Artificial Intelligence
+
+Analyze deeper. Build faster. Think bigger.
+Powered by adaptive intelligence, advanced reasoning, and limitless creativity.
+
+Your imagination is the only limit.
+
+➜ 🧠 Enter the future ✨`, "bot", false);
         return;
     }
 
