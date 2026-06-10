@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI — Authentication Mainframe</title>
+    <title>Zytherion AI — Gateway Mainframe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -40,12 +40,13 @@
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text-main);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 20px;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -87,11 +88,13 @@
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
             animation: cardFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            margin-top: 40px;
+            margin-bottom: 40px;
         }
 
         .brand-header {
@@ -99,7 +102,7 @@
             flex-direction: column;
             align-items: center;
             gap: 16px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
             text-align: center;
         }
 
@@ -127,7 +130,7 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .form-label {
@@ -145,7 +148,7 @@
             border: 1px solid var(--glass-border);
             outline: none;
             color: var(--text-main);
-            padding: 14px 16px;
+            padding: 12px 16px;
             font-size: 15px;
             border-radius: 10px;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -216,6 +219,7 @@
             color: var(--accent);
             text-decoration: none;
             font-weight: 500;
+            cursor: pointer;
         }
 
         .auth-link:hover {
@@ -230,12 +234,19 @@
             display: none;
             text-align: center;
             word-break: break-word;
+            line-height: 1.5;
         }
 
         .msg-alert.error {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.2);
             color: #f87171;
+        }
+
+        .msg-alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
         }
 
         @keyframes cardFadeIn {
@@ -247,28 +258,31 @@
 <body>
 
     <div class="top-bar">
-        <button class="ui-btn" id="themeToggleBtn">🌓 Theme</button>
+        <button class="ui-btn" id="themeToggleBtn">🌓 Toggle Theme</button>
     </div>
 
     <div class="auth-card">
         <div class="brand-header">
             <img class="brand-logo" src="logo.svg" alt="Zytherion Logo">
-            <div class="brand-title">
-                Zytherion <span><em>AI</em></span>
-                <div class="brand-subtitle">Access Core Operations Mainframe</div>
-            </div>
+            <div class="brand-title" id="mainframeTitle">Zytherion <span><em>AI</em></span></div>
+            <div class="brand-subtitle" id="mainframeSubtitle">Create New Account</div>
         </div>
 
-        <div class="msg-alert error" id="errorBox"></div>
+        <div class="msg-alert" id="statusBox"></div>
 
-        <form id="loginForm" onsubmit="executeAuthentication(event)">
+        <form id="authForm" onsubmit="handleFormSubmission(event)">
+            <div class="form-group" id="usernameGroup">
+                <label class="form-label">Operator Handle Name</label>
+                <input class="input-field" type="text" id="username" placeholder="Operator Name" autocomplete="name">
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Email Matrix String</label>
-                <input class="input-field" type="email" id="email" placeholder="name@domain.com" required autocomplete="username">
+                <input class="input-field" type="email" id="email" placeholder="name@domain.com" required autocomplete="email">
             </div>
             
-            <div class="form-group" style="margin-bottom: 28px;">
-                <label class="form-label">Secure Passkey Phrase</label>
+            <div class="form-group">
+                <label class="form-label" id="passwordLabel">Create Secure Passkey Phrase</label>
                 <div class="password-container">
                     <input class="input-field" type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
                     <button type="button" class="toggle-visibility-btn" id="togglePassword" title="Toggle Visibility">
@@ -277,11 +291,21 @@
                 </div>
             </div>
 
-            <button class="submit-btn" type="submit">Initialize Session</button>
+            <div class="form-group" id="confirmPasswordGroup" style="margin-bottom: 26px;">
+                <label class="form-label">Confirm Secure Passkey Phrase</label>
+                <div class="password-container">
+                    <input class="input-field" type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+                    <button type="button" class="toggle-visibility-btn" id="toggleConfirmPassword" title="Toggle Visibility">
+                        <svg id="confirmEyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button class="submit-btn" type="submit" id="submitActionBtn">Provision Node</button>
         </form>
 
-        <div class="auth-footer">
-            New operator node? <a class="auth-link" href="register.html">Register Terminal</a>
+        <div class="auth-footer" id="formFooterState">
+            Already a registered operator? <a class="auth-link" onclick="toggleFormMode('login')">Login Node</a>
         </div>
     </div>
 
@@ -298,65 +322,153 @@
             localStorage.setItem("theme", newTheme);
         });
 
-        // Passkey Visibility Controller
-        const passwordInput = document.getElementById("password");
-        const togglePasswordBtn = document.getElementById("togglePassword");
-        const eyeIcon = document.getElementById("eyeIcon");
+        // Passkey Character Field Toggle Controllers
+        function setupPasswordToggle(inputElementId, buttonElementId, iconElementId) {
+            const input = document.getElementById(inputElementId);
+            const btn = document.getElementById(buttonElementId);
+            const icon = document.getElementById(iconElementId);
 
-        togglePasswordBtn.addEventListener("click", () => {
-            const isCurrentlyHidden = passwordInput.getAttribute("type") === "password";
-            if (isCurrentlyHidden) {
-                passwordInput.setAttribute("type", "text");
-                eyeIcon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+            btn.addEventListener("click", () => {
+                const isHidden = input.getAttribute("type") === "password";
+                if (isHidden) {
+                    input.setAttribute("type", "text");
+                    icon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+                } else {
+                    input.setAttribute("type", "password");
+                    icon.innerHTML = `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/>`;
+                }
+            });
+        }
+
+        setupPasswordToggle("password", "togglePassword", "eyeIcon");
+        setupPasswordToggle("confirmPassword", "toggleConfirmPassword", "confirmEyeIcon");
+
+        // UI View State Switch Toggle Engine (Presented as Registration / Create New Account First)
+        let currentMode = "register";
+
+        function toggleFormMode(targetMode) {
+            currentMode = targetMode;
+            const statusBox = document.getElementById("statusBox");
+            const subtitle = document.getElementById("mainframeSubtitle");
+            const usernameGroup = document.getElementById("usernameGroup");
+            const confirmPasswordGroup = document.getElementById("confirmPasswordGroup");
+            const passwordLabel = document.getElementById("passwordLabel");
+            const submitBtn = document.getElementById("submitActionBtn");
+            const footerState = document.getElementById("formFooterState");
+
+            statusBox.style.display = "none";
+            document.getElementById("password").value = "";
+            document.getElementById("confirmPassword").value = "";
+
+            if (targetMode === "login") {
+                subtitle.innerText = "Access Core Operations Mainframe";
+                usernameGroup.style.display = "none";
+                confirmPasswordGroup.style.display = "none";
+                document.getElementById("username").removeAttribute("required");
+                document.getElementById("confirmPassword").removeAttribute("required");
+                passwordLabel.innerText = "Secure Passkey Phrase";
+                submitBtn.innerText = "Initialize Session";
+                footerState.innerHTML = `New operator node? <a class="auth-link" onclick="toggleFormMode('register')">Create New Account</a>`;
             } else {
-                passwordInput.setAttribute("type", "password");
-                eyeIcon.innerHTML = `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/>`;
+                subtitle.innerText = "Create New Account";
+                usernameGroup.style.display = "block";
+                confirmPasswordGroup.style.display = "block";
+                document.getElementById("username").setAttribute("required", "true");
+                document.getElementById("confirmPassword").setAttribute("required", "true");
+                passwordLabel.innerText = "Create Secure Passkey Phrase";
+                submitBtn.innerText = "Provision Node";
+                footerState.innerHTML = `Already a registered operator? <a class="auth-link" onclick="toggleFormMode('login')">Login Node</a>`;
             }
-        });
+        }
 
-        // Authentication Controller Pipeline
-        async function executeAuthentication(event) {
+        // Initialize Default View State Configuration Requirements
+        toggleFormMode("register");
+
+        // Process Submission Form Logic Operations
+        async function handleFormSubmission(event) {
             event.preventDefault();
             
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
-            const errorBox = document.getElementById("errorBox");
+            const statusBox = document.getElementById("statusBox");
             
-            errorBox.style.display = "none";
+            statusBox.className = "msg-alert";
+            statusBox.style.display = "none";
 
-            // STRATEGY: Switch the commented blocks below depending on your backend configuration definitions.
-            
-           // CONFIGURATION VARIANT A: Standard API route endpoint (Commented out)
-// const AUTH_URL = "https://aegisai-backend-ifvc.onrender.com/api/login";
+            // Base Server Cluster Mapping Structure Target Parameters
+            const BASE_SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+                ? "http://localhost:3000"
+                : "https://aegisai-backend-ifvc.onrender.com";
 
-// CONFIGURATION VARIANT B: Root fallback path endpoint (UNCOMMENTED & ACTIVE)
-const AUTH_URL = "https://aegisai-backend-ifvc.onrender.com/";
-            try {
-                const response = await fetch(AUTH_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
+            if (currentMode === "register") {
+                const username = document.getElementById("username").value.trim();
+                const confirmPassword = document.getElementById("confirmPassword").value;
 
-                // Intercept any non-JSON HTML payloads cleanly before parsing
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Mismatched backend data route configuration. Try switching the AUTH_URL variant inside line 230 of your login.html file.");
+                // 1. Password Matching Field Logic Verification
+                if (password !== confirmPassword) {
+                    statusBox.innerText = "Validation Failed: Passkey entries mismatch. Both passphrases must be identical.";
+                    statusBox.classList.add("error");
+                    statusBox.style.display = "block";
+                    return;
                 }
 
-                const data = await response.json();
+                // 2. Strict Complex Security Policy Policy Rules Validation
+                const minLength = password.length >= 8;
+                const hasUppercase = /[A-Z]/.test(password);
+                const hasLowercase = /[a-z]/.test(password);
+                const hasDigit = /[0-9]/.test(password);
+                const hasSpecial = /[^A-Za-z0-9]/.test(password);
 
-                if (!response.ok) {
-                    throw new Error(data.message || "Access denied. Invalid credentials string match.");
+                if (!minLength || !hasUppercase || !hasLowercase || !hasDigit || !hasSpecial) {
+                    statusBox.innerText = "Security Rule Error: Passkey must have a minimum of 8 characters, including 1 uppercase, 1 lowercase, 1 numeric digit, and 1 special symbol character attribute.";
+                    statusBox.classList.add("error");
+                    statusBox.style.display = "block";
+                    return;
                 }
 
-                localStorage.setItem("token", data.token);
-                window.location.href = "index.html";
+                // Dispatch New Account Data to verified endpoint location
+                try {
+                    const response = await fetch(`${BASE_SERVER_URL}/api/auth/register`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, email, password })
+                    });
 
-            } catch (error) {
-                errorBox.innerText = error.message;
-                errorBox.style.display = "block";
-                console.error("Auth Exception Layer Error:", error);
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || "Registration operation rejected.");
+
+                    statusBox.innerText = "Account Created successfully. Loading secure verification panel layers...";
+                    statusBox.classList.add("success");
+                    statusBox.style.display = "block";
+
+                    setTimeout(() => { toggleFormMode("login"); }, 2000);
+
+                } catch (error) {
+                    statusBox.innerText = "Registration Intercept Failure: " + error.message;
+                    statusBox.classList.add("error");
+                    statusBox.style.display = "block";
+                }
+
+            } else {
+                // Execute Secure Login Pipeline
+                try {
+                    const response = await fetch(`${BASE_SERVER_URL}/api/auth/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || "Invalid credential credentials profile matching sequence.");
+
+                    localStorage.setItem("token", data.token);
+                    window.location.href = "index.html";
+
+                } catch (error) {
+                    statusBox.innerText = "Access Validation Error: " + error.message;
+                    statusBox.classList.add("error");
+                    statusBox.style.display = "block";
+                }
             }
         }
     </script>
