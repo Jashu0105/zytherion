@@ -396,9 +396,8 @@
             statusBox.style.display = "none";
 
             // Base Server Cluster Mapping Structure Target Parameters
-            const BASE_SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:3000"
-                : "https://aegisai-backend-ifvc.onrender.com";
+            // Hardcoded production endpoint ensuring direct communication with Render
+const BASE_SERVER_URL = "https://aegisai-backend-ifvc.onrender.com";
 
             if (currentMode === "register") {
                 const username = document.getElementById("username").value.trim();
