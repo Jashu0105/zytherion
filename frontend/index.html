@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zytherion AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
@@ -269,15 +270,28 @@
             color: var(--text-muted);
         }
 
-        .support-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.2s ease;
+        .support-channels {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        .support-link:hover {
+        .support-icon-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .support-icon-link:hover {
             color: var(--accent);
-            text-decoration: underline;
+            transform: translateY(-1px);
+        }
+
+        .support-icon-link svg {
+            width: 16px;
+            height: 16px;
         }
 
         .disclaimer-tag {
@@ -324,7 +338,14 @@
             </div>
             
             <div class="workspace-footer">
-                <a href="mailto:zytherionai@gmail.com" class="support-link">Contact Support</a>
+                <div class="support-channels">
+                    <a href="mailto:zytherionai@gmail.com" class="support-icon-link" title="Email Support">
+                        <i data-lucide="mail"></i>
+                    </a>
+                    <a href="https://www.instagram.com/zyntherionai" target="_blank" rel="noopener noreferrer" class="support-icon-link" title="Instagram Support">
+                        <i data-lucide="instagram"></i>
+                    </a>
+                </div>
                 <div class="disclaimer-tag">Zytherion is an AI and may make mistakes.</div>
             </div>
         </div>
@@ -348,6 +369,9 @@
             localStorage.removeItem("token");
             window.location.href = "login.html";
         });
+
+        // Initialize Lucide SVG Vector Embed Engine 
+        lucide.createIcons();
     </script>
     <script src="script.js"></script>
 </body>
