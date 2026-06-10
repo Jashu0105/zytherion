@@ -292,7 +292,7 @@
             </div>
 
             <div class="form-group" id="confirmPasswordGroup" style="margin-bottom: 26px;">
-                <label class="form-label">Confirm Secure Passkey</label>
+                <label class="form-label">Confirm Your Password</label>
                 <div class="password-container">
                     <input class="input-field" type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
                     <button type="button" class="toggle-visibility-btn" id="toggleConfirmPassword" title="Toggle Visibility">
@@ -375,7 +375,7 @@
                 confirmPasswordGroup.style.display = "block";
                 document.getElementById("username").setAttribute("required", "true");
                 document.getElementById("confirmPassword").setAttribute("required", "true");
-                passwordLabel.innerText = "Create Secure Passkey";
+                passwordLabel.innerText = "Create Password";
                 submitBtn.innerText = "Register";
                 footerState.innerHTML = `Already a registered user? <a class="auth-link" onclick="toggleFormMode('login')">Login</a>`;
             }
