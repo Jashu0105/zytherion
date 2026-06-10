@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI</title>
+    <title>Zytherion Mainframe</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -126,12 +126,25 @@
         }
 
         .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             font-size: 19px;
             font-weight: 600;
             letter-spacing: -0.3px;
+            user-select: none;
+        }
+
+        .brand-title img {
+            display: block;
         }
 
         .brand-title span {
+            color: var(--text-main);
+        }
+
+        .brand-title span em {
+            font-style: normal;
             color: var(--accent);
         }
 
@@ -291,7 +304,10 @@
 
     <div class="main-workspace">
         <div class="top-bar">
-            <div class="brand-title">Zytherion//<span>Core</span></div>
+            <div class="brand-title">
+                <img src="logo.svg" alt="Zytherion Logo" style="width: 28px; height: 28px;">
+                <span>Zytherion <em>AI</em></span>
+            </div>
             <div class="controls-group">
                 <button class="ui-btn" id="themeToggleBtn">🌓 Toggle Theme</button>
                 <button class="ui-btn" id="logoutBtn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.15);">Logout</button>
