@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Zytherion AI - Access Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        /* ==========================================================================
+           ZYTHERION CYBERPUNK SLIDE PANEL DESIGN SYSTEM
+           ========================================================================== */
         :root {
             --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
             --glass-bg: rgba(15, 23, 42, 0.45);
@@ -14,43 +18,43 @@
             --text-muted: #64748b;
             --accent: #d1a85c;
             --accent-glow: rgba(209, 168, 92, 0.15);
-            --input-bg: rgba(255, 255, 255, 0.02);
-        }
-
-        [data-theme="light"] {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(15, 23, 42, 0.06);
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --accent: #b89146;
-            --accent-glow: rgba(184, 145, 70, 0.08);
-            --input-bg: rgba(15, 23, 42, 0.02);
+            --input-bg: rgba(4, 6, 10, 0.6);
+            --panel-slide-bg: linear-gradient(135deg, #0a1128 0%, #02040a 100%);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
-            transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, color 0.2s ease;
+            text-decoration: none;
         }
 
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
+            overflow: hidden;
             position: relative;
         }
 
-        /* Fixed Top Bar Layout Grid Alignment */
+        /* Ambient Cyber-Grid Background Effect */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(209, 168, 92, 0.03) 0%, transparent 35%),
+                radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top Bar Placement */
         .top-bar {
             position: absolute;
             top: 0;
@@ -61,7 +65,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 12px;
+            z-index: 20;
         }
 
         .ui-btn {
@@ -73,400 +77,495 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            text-decoration: none;
         }
 
         .ui-btn:hover {
             border-color: var(--accent);
             box-shadow: 0 0 12px var(--accent-glow);
-            color: var(--text-main);
         }
 
-        .auth-card {
-            background: var(--glass-bg);
+        /* Master Matrix Container */
+        @keyframes masterPulse {
+            0%, 100% { box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(209, 168, 92, 0.05); }
+            50% { box-shadow: 0 35px 65px -10px rgba(0, 0, 0, 0.9), 0 0 25px rgba(209, 168, 92, 0.2); }
+        }
+
+        .container {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            background: rgba(11, 19, 36, 0.45);
             border: 1px solid var(--glass-border);
+            border-radius: 30px;
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            width: 100%;
-            max-width: 440px;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-            animation: cardFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-            margin-top: 60px;
-            margin-bottom: 40px;
+            overflow: hidden;
+            animation: masterPulse 6s infinite ease-in-out;
+            z-index: 10;
         }
 
-        .brand-header {
+        /* Form Content Presentation Desks */
+        .form-box {
+            position: absolute;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: transparent;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 28px;
-            text-align: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 1;
+            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, visibility 0s 0.6s;
+        }
+
+        .container.active .form-box.login {
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .form-box.register {
+            transform: translateX(100%);
+            opacity: 0;
+            visibility: hidden;
+            left: 0;
+        }
+
+        .container.active .form-box.register {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, visibility 0s 0s;
+        }
+
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .brand-logo {
-            width: 48px;
-            height: 48px;
-            display: block;
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            align-self: center;
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        .brand-title {
-            font-size: 24px;
+        form h1 {
+            font-size: 28px;
             font-weight: 600;
+            text-align: center;
+            margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
 
-        .brand-title em {
-            font-style: normal;
-            color: var(--accent);
-        }
-
-        .brand-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
+        .form-subtitle {
             font-size: 13px;
-            font-weight: 500;
             color: var(--text-muted);
-            margin-bottom: 8px;
-            padding-left: 2px;
+            text-align: center;
+            margin-bottom: 24px;
         }
 
-        .input-field {
+        /* Input Block Fields */
+        .input-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .input-box input {
             width: 100%;
+            padding: 14px 50px 14px 18px;
             background: var(--input-bg);
             border: 1px solid var(--glass-border);
+            border-radius: 10px;
             outline: none;
-            color: var(--text-main);
-            padding: 12px 16px;
             font-size: 15px;
-            border-radius: 10px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            color: var(--text-main);
+            transition: all 0.2s ease;
         }
 
-        .input-field:focus {
+        .input-box input:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 14px var(--accent-glow);
+            box-shadow: 0 0 12px var(--accent-glow);
+            background: rgba(15, 23, 42, 0.6);
         }
 
-        .password-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .password-container .input-field {
-            padding-right: 46px;
-        }
-
-        .toggle-visibility-btn {
+        .input-box i {
             position: absolute;
-            right: 14px;
-            background: none;
-            border: none;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
             color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
+            transition: color 0.2s;
         }
 
-        .toggle-visibility-btn:hover {
-            color: var(--text-main);
+        .input-box input:focus ~ i {
+            color: var(--accent);
         }
 
-        .submit-btn {
-            width: 100%;
-            background: var(--accent);
-            color: #02040a;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: opacity 0.2s, transform 0.1s;
+        .forgot-link {
+            text-align: right;
+            margin: -4px 0 18px;
         }
 
-        .submit-btn:hover {
-            opacity: 0.95;
-        }
-
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 24px;
+        .forgot-link a {
             font-size: 13px;
             color: var(--text-muted);
         }
 
-        .auth-link {
+        .forgot-link a:hover {
             color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .auth-link:hover {
             text-decoration: underline;
         }
 
-        .msg-alert {
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 20px;
-            display: none;
+        /* Buttons */
+        .btn {
+            width: 100%;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            color: #02040a;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(209, 168, 92, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        form p {
+            font-size: 12px;
+            color: var(--text-muted);
             text-align: center;
-            word-break: break-word;
+            margin: 16px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Social Integrations Elements */
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg);
+            border-radius: 8px;
+            font-size: 20px;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .social-icons a:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* ==========================================================================
+           THE SPLIT GRAPHICS SLIDING TOGGLE LAYER
+           ========================================================================== */
+        .toggle-box {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .toggle-box::before {
+            content: '';
+            position: absolute;
+            left: -250%;
+            width: 300%;
+            height: 100%;
+            background: var(--panel-slide-bg);
+            border-right: 1px solid rgba(209, 168, 92, 0.2);
+            border-left: 1px solid rgba(209, 168, 92, 0.2);
+            border-radius: 150px;
+            z-index: 2;
+            pointer-events: all;
+            transition: left 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .container.active .toggle-box::before {
+            left: 50%;
+        }
+
+        .toggle-panel {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 40px;
+            text-align: center;
+            z-index: 2;
+            pointer-events: all;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .toggle-panel h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .toggle-panel p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
             line-height: 1.5;
         }
 
-        .msg-alert.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #f87171;
+        .toggle-panel .btn {
+            width: 150px;
+            height: 44px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            box-shadow: none;
         }
 
-        .msg-alert.success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #34d399;
+        .toggle-panel .btn:hover {
+            background: var(--accent);
+            color: #02040a;
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        @keyframes cardFadeIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
+        .toggle-panel.toggle-left {
+            left: 0;
+            transform: translateX(0);
+            transition-delay: 0.6s;
+        }
+
+        .container.active .toggle-panel.toggle-left {
+            transform: translateX(-100%);
+            transition-delay: 0s;
+        }
+
+        .toggle-panel.toggle-right {
+            right: 0;
+            transform: translateX(100%);
+            transition-delay: 0s;
+        }
+
+        .container.active .toggle-panel.toggle-right {
+            transform: translateX(0);
+            transition-delay: 0.6s;
+        }
+
+        /* Diagnostics Alert Panel */
+        .msg-alert {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            text-align: center;
+            z-index: 30;
+            backdrop-filter: blur(10px);
+        }
+
+        .msg-alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid #f87171; color: #f87171; }
+        .msg-alert.success { background: rgba(16, 185, 129, 0.15); border: 1px solid #34d399; color: #34d399; }
+
+        /* Responsive Layouts Matrix */
+        @media screen and (max-width: 880px) {
+            .container { width: 95%; height: 620px; }
         }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <a href="mailto:zytherionai@gmail.com?subject=Platform%20Feedback%20-%20Authentication%20Gateway" class="ui-btn" title="Submit Platform Feedback">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span>Feedback</span>
-        </a>
-        <button class="ui-btn" id="themeToggleBtn">🌓 Theme</button>
+        <button class="ui-btn" onclick="window.location.href='mailto:zytherionai@gmail.com'">🌓 Core Matrix Feedback</button>
     </div>
 
-    <div class="auth-card">
-        <div class="brand-header">
-            <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
-            <div class="brand-title" id="mainframeTitle">Zytherion <span><em>AI</em></span></div>
-            <div class="brand-subtitle" id="mainframeSubtitle">Create New Account</div>
+    <!-- Live Dynamic Feedback Overlay System -->
+    <div class="msg-alert" id="statusBox"></div>
+
+    <div class="container">
+        
+        <!-- LOGIN WORKSPACE FORM -->
+        <div class="form-box login">
+            <form id="loginForm" onsubmit="executeAuth(event, 'login')">
+                <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                <h1>Mainframe Login</h1>
+                <p class="form-subtitle">Initialize your credential session profile</p>
+                
+                <div class="input-box">
+                    <input type="email" id="loginEmail" placeholder="Email Address" required autocomplete="email">
+                    <i class='bx bxs-envelope'></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="loginPassword" placeholder="Passkey" required autocomplete="current-password">
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="forgot-link">
+                    <a href="#">Forgot Cipher Key?</a>
+                </div>
+                <button type="submit" class="btn">Initialize Session</button>
+                <p>Third-Party Secure Linkages</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin'></i></a>
+                </div>
+            </form>
         </div>
 
-        <div class="msg-alert" id="statusBox"></div>
-
-        <form id="authForm" onsubmit="handleFormSubmission(event)">
-            <div class="form-group" id="usernameGroup">
-                <label class="form-label">User Name</label>
-                <input class="input-field" type="text" id="username" placeholder="User Name" autocomplete="name">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Email Address</label>
-                <input class="input-field" type="email" id="email" placeholder="name@domain.com" required autocomplete="email">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" id="passwordLabel">Create Secure Passkey</label>
-                <div class="password-container">
-                    <input class="input-field" type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
-                    <button type="button" class="toggle-visibility-btn" id="togglePassword" title="Toggle Visibility">
-                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+        <!-- REGISTRATION WORKSPACE FORM -->
+        <div class="form-box register">
+            <form id="registerForm" onsubmit="executeAuth(event, 'register')">
+                <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                <h1>Create Profile</h1>
+                <p class="form-subtitle">Establish safe entry nodes into the workspace</p>
+                
+                <div class="input-box">
+                    <input type="text" id="regUser" placeholder="User Name Identification" required autocomplete="name">
+                    <i class='bx bxs-user'></i>
                 </div>
-            </div>
-
-            <div class="form-group" id="confirmPasswordGroup" style="margin-bottom: 26px;">
-                <label class="form-label">Confirm Your Password</label>
-                <div class="password-container">
-                    <input class="input-field" type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
-                    <button type="button" class="toggle-visibility-btn" id="toggleConfirmPassword" title="Toggle Visibility">
-                        <svg id="confirmEyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                <div class="input-box">
+                    <input type="email" id="regEmail" placeholder="Core Email Destination" required autocomplete="email">
+                    <i class='bx bxs-envelope'></i>
                 </div>
+                <div class="input-box">
+                    <input type="password" id="regPassword" placeholder="Create Secure Passphrase" required autocomplete="new-password">
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <button type="submit" class="btn">Generate Node Account</button>
+                <p>Register via Alternate Matrix</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin'></i></a>
+                </div>
+            </form>
+        </div>
+
+        <!-- AMBIENT SLIDING FLIP PANELS -->
+        <div class="toggle-box">
+            <div class="toggle-panel toggle-left">
+                <h1>Hello, Operator!</h1>
+                <p>If you have not generated entry parameters into the Zytherion matrix framework, initialize a core account layout right now.</p>
+                <button class="btn register-btn">Open Register Panel</button>
             </div>
 
-            <button class="submit-btn" type="submit" id="submitActionBtn">Register</button>
-        </form>
-
-        <div class="auth-footer" id="formFooterState">
-            Already a registered user? <a class="auth-link" onclick="toggleFormMode('login')">Login</a>
+            <div class="toggle-panel toggle-right">
+                <h1>Welcome Back!</h1>
+                <p>If you already possess authenticated credential keys verified by our blockchain database networks, return to login panel.</p>
+                <button class="btn login-btn">Open Login Panel</button>
+            </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT ANIMATION ROUTERS & AUTH SYNCHRONIZATION -->
     <script>
-        // Core Visual State Management
-        const themeToggleBtn = document.getElementById("themeToggleBtn");
-        const savedTheme = localStorage.getItem("theme") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
+        const container = document.querySelector('.container');
+        const registerBtn = document.querySelector('.register-btn');
+        const loginBtn = document.querySelector('.login-btn');
+        const statusBox = document.getElementById("statusBox");
 
-        themeToggleBtn.addEventListener("click", () => {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-        });
+        // Audited sliding view assignments[cite: 7]
+        registerBtn.addEventListener('click', () => { container.classList.add('active'); });
+        loginBtn.addEventListener('click', () => { container.classList.remove('active'); });
 
-        // Passkey Character Field Toggle Controllers
-        function setupPasswordToggle(inputElementId, buttonElementId, iconElementId) {
-            const input = document.getElementById(inputElementId);
-            const btn = document.getElementById(buttonElementId);
-            const icon = document.getElementById(iconElementId);
-
-            btn.addEventListener("click", () => {
-                const isHidden = input.getAttribute("type") === "password";
-                if (isHidden) {
-                    input.setAttribute("type", "text");
-                    icon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23"/>`;
-                } else {
-                    input.setAttribute("type", "password");
-                    icon.innerHTML = `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/>`;
-                }
-            });
-        }
-
-        setupPasswordToggle("password", "togglePassword", "eyeIcon");
-        setupPasswordToggle("confirmPassword", "toggleConfirmPassword", "confirmEyeIcon");
-
-        let currentMode = "register";
-
-        function toggleFormMode(targetMode) {
-            currentMode = targetMode;
-            const statusBox = document.getElementById("statusBox");
-            const subtitle = document.getElementById("mainframeSubtitle");
-            const usernameGroup = document.getElementById("usernameGroup");
-            const confirmPasswordGroup = document.getElementById("confirmPasswordGroup");
-            const passwordLabel = document.getElementById("passwordLabel");
-            const submitBtn = document.getElementById("submitActionBtn");
-            const footerState = document.getElementById("formFooterState");
-
-            statusBox.style.display = "none";
-            document.getElementById("password").value = "";
-            document.getElementById("confirmPassword").value = "";
-
-            if (targetMode === "login") {
-                subtitle.innerText = "Login to Your Account";
-                usernameGroup.style.display = "none";
-                confirmPasswordGroup.style.display = "none";
-                document.getElementById("username").removeAttribute("required");
-                document.getElementById("confirmPassword").removeAttribute("required");
-                passwordLabel.innerText = "Password";
-                submitBtn.innerText = "Login";
-                footerState.innerHTML = `New Users to Zytherion AI? <a class="auth-link" onclick="toggleFormMode('register')">Create New Account</a>`;
-            } else {
-                subtitle.innerText = "Create New Account";
-                usernameGroup.style.display = "block";
-                confirmPasswordGroup.style.display = "block";
-                document.getElementById("username").setAttribute("required", "true");
-                document.getElementById("confirmPassword").setAttribute("required", "true");
-                passwordLabel.innerText = "Create Password";
-                submitBtn.innerText = "Register";
-                footerState.innerHTML = `Already a registered user? <a class="auth-link" onclick="toggleFormMode('login')">Login</a>`;
+        function printAlert(msg, level) {
+            statusBox.innerText = msg;
+            statusBox.className = `msg-alert ${level}`;
+            statusBox.style.display = "block";
+            if (level === "error") {
+                setTimeout(() => { statusBox.style.display = "none"; }, 4000);
             }
         }
 
-        toggleFormMode("register");
-
-        async function handleFormSubmission(event) {
+        async function executeAuth(event, type) {
             event.preventDefault();
-            
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value;
-            const statusBox = document.getElementById("statusBox");
-            
-            statusBox.className = "msg-alert";
             statusBox.style.display = "none";
 
-            const BASE_SERVER_URL = "https://aegisai-backend-ifvc.onrender.com";
+            // Audited: Dynamic network protocol mapper
+            const BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+                ? "http://localhost:3000"
+                : "https://aegisai-backend-ifvc.onrender.com";
 
-            if (currentMode === "register") {
-                const username = document.getElementById("username").value.trim();
-                const confirmPassword = document.getElementById("confirmPassword").value;
+            if (type === "register") {
+                const username = document.getElementById("regUser").value.trim();
+                const email = document.getElementById("regEmail").value.trim();
+                const password = document.getElementById("regPassword").value;
 
-                if (password !== confirmPassword) {
-                    statusBox.innerText = "Validation Failed: Passkey entries mismatch. Both passphrases must be identical.";
-                    statusBox.classList.add("error");
-                    statusBox.style.display = "block";
-                    return;
-                }
-
-                const minLength = password.length >= 8;
-                const hasUppercase = /[A-Z]/.test(password);
-                const hasLowercase = /[a-z]/.test(password);
-                const hasDigit = /[0-9]/.test(password);
-                const hasSpecial = /[^A-Za-z0-9]/.test(password);
-
-                if (!minLength || !hasUppercase || !hasLowercase || !hasDigit || !hasSpecial) {
-                    statusBox.innerText = "Security Rule Error: Passkey must have a minimum of 8 characters, including 1 uppercase, 1 lowercase, 1 numeric digit, and 1 special symbol character attribute.";
-                    statusBox.classList.add("error");
-                    statusBox.style.display = "block";
+                if (password.length < 8) {
+                    printAlert("Security Policy Failure: Cipher key must be at least 8 elements long.", "error");
                     return;
                 }
 
                 try {
-                    const response = await fetch(`${BASE_SERVER_URL}/api/auth/register`, {
+                    const res = await fetch(`${BASE_URL}/api/auth/register`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ username, email, password })
                     });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Registration trace rejected.");
 
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || "Registration operation rejected.");
-
-                    statusBox.innerText = "Account Created successfully. Loading secure verification panel layers...";
-                    statusBox.classList.add("success");
-                    statusBox.style.display = "block";
-
-                    setTimeout(() => { toggleFormMode("login"); }, 2000);
-
-                } catch (error) {
-                    statusBox.innerText = "Registration Intercept Failure: " + error.message;
-                    statusBox.classList.add("error");
-                    statusBox.style.display = "block";
+                    printAlert("Identity encrypted and verified! Sliding back to login panel layout...", "success");
+                    setTimeout(() => {
+                        document.getElementById("registerForm").reset();
+                        container.classList.remove('active');
+                    }, 2000);
+                } catch (err) {
+                    printAlert(`Registration Abort: ${err.message}`, "error");
                 }
-
             } else {
+                const email = document.getElementById("loginEmail").value.trim();
+                const password = document.getElementById("loginPassword").value;
+
                 try {
-                    const response = await fetch(`${BASE_SERVER_URL}/api/auth/login`, {
+                    const res = await fetch(`${BASE_URL}/api/auth/login`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email, password })
                     });
-
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || "Invalid credential credentials profile matching sequence.");
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || "Invalid database authorization token sequence matching matches.");
 
                     localStorage.setItem("token", data.token);
+                    printAlert("Cipher key unlocked! Synchronizing security nodes...", "success");
                     window.location.href = "index.html";
-
-                } catch (error) {
-                    statusBox.innerText = "Access Validation Error: " + error.message;
-                    statusBox.classList.add("error");
-                    statusBox.style.display = "block";
+                } catch (err) {
+                    printAlert(`Mainframe Denied Access: ${err.message}`, "error");
                 }
             }
         }
