@@ -21,7 +21,6 @@
             --input-bg: rgba(4, 6, 10, 0.6);
             --panel-slide-bg: linear-gradient(135deg, #0a1128 0%, #02040a 100%);
             
-            /* Sliding Panel Specific Theme Variables */
             --toggle-text-pure: #ffffff;
             --toggle-text-muted: #94a3b8;
             --toggle-btn-border: #d1a85c;
@@ -30,21 +29,21 @@
             --toggle-btn-hover-text: #02040a;
         }
 
-        /* AUDITED: Perfect light theme override map with pure black text for the panels */
+        /* AUDITED: Replaced burning white with premium matte platinum and slate gray */
         [data-theme="light"] {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(15, 23, 42, 0.08);
-            --text-main: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); /* Soft metallic grey instead of pure white */
+            --glass-bg: rgba(255, 255, 255, 0.4); 
+            --glass-border: rgba(15, 23, 42, 0.1);
+            --text-main: #0f172a; /* Deep charcoal black text */
             --text-muted: #475569;
-            --accent: #b89146;
-            --accent-glow: rgba(184, 145, 70, 0.1);
-            --input-bg: rgba(255, 255, 255, 0.8);
-            --panel-slide-bg: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            --accent: #a37f3d; /* Deeper gold to stand out on light background */
+            --accent-glow: rgba(163, 127, 61, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --panel-slide-bg: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); /* Muted industrial steel panels */
             
-            /* FIXED: Forced to absolute solid black colors when light theme is deployed */
+            /* High-contrast pure black text for maximum legibility */
             --toggle-text-pure: #000000;
-            --toggle-text-muted: #1e293b;
+            --toggle-text-muted: #0f172a;
             --toggle-btn-border: #000000;
             --toggle-btn-text: #000000;
             --toggle-btn-hover-bg: #000000;
@@ -240,7 +239,7 @@
         .input-box input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 12px var(--accent-glow);
-            background: rgba(15, 23, 42, 0.2);
+            background: rgba(15, 23, 42, 0.1);
         }
 
         .input-box i.input-icon {
@@ -481,6 +480,7 @@
 
     <div class="container">
         
+        <!-- LOGIN PANEL -->
         <div class="form-box login">
             <form id="loginForm" onsubmit="executeAuth(event, 'login')">
                 <div class="logo-wrapper">
@@ -513,6 +513,7 @@
             </form>
         </div>
 
+        <!-- REGISTRATION PANEL -->
         <div class="form-box register">
             <form id="registerForm" onsubmit="executeAuth(event, 'register')">
                 <div class="logo-wrapper">
@@ -553,6 +554,7 @@
             </form>
         </div>
 
+        <!-- AMBIENT SLIDING PANELS -->
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
                 <h1>Hello, User!</h1>
