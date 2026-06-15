@@ -20,9 +20,17 @@
             --accent-glow: rgba(209, 168, 92, 0.15);
             --input-bg: rgba(4, 6, 10, 0.6);
             --panel-slide-bg: linear-gradient(135deg, #0a1128 0%, #02040a 100%);
+            
+            /* Sliding Panel Specific Theme Variables */
+            --toggle-text-pure: #ffffff;
+            --toggle-text-muted: #94a3b8;
+            --toggle-btn-border: #d1a85c;
+            --toggle-btn-text: #d1a85c;
+            --toggle-btn-hover-bg: #d1a85c;
+            --toggle-btn-hover-text: #02040a;
         }
 
-        /* Explicit Light Theme Architecture */
+        /* AUDITED: Perfect light theme override map with pure black text for the panels */
         [data-theme="light"] {
             --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             --glass-bg: rgba(255, 255, 255, 0.65);
@@ -33,6 +41,14 @@
             --accent-glow: rgba(184, 145, 70, 0.1);
             --input-bg: rgba(255, 255, 255, 0.8);
             --panel-slide-bg: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            
+            /* FIXED: Forced to absolute solid black colors when light theme is deployed */
+            --toggle-text-pure: #000000;
+            --toggle-text-muted: #1e293b;
+            --toggle-btn-border: #000000;
+            --toggle-btn-text: #000000;
+            --toggle-btn-hover-bg: #000000;
+            --toggle-btn-hover-text: #ffffff;
         }
 
         * {
@@ -56,7 +72,6 @@
             transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
         }
 
-        /* Ambient Cyber-Grid Background Effect */
         body::before {
             content: "";
             position: absolute;
@@ -68,7 +83,6 @@
             z-index: 0;
         }
 
-        /* FIXED: Isolated Top Navigation hitboxes to prevent overlapping */
         .top-bar {
             position: absolute;
             top: 0;
@@ -108,7 +122,6 @@
             transform: translateY(-1px);
         }
 
-        /* Master Matrix Container */
         @keyframes masterPulse {
             0%, 100% { box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(209, 168, 92, 0.05); }
             50% { box-shadow: 0 35px 65px -10px rgba(0, 0, 0, 0.9), 0 0 25px rgba(209, 168, 92, 0.2); }
@@ -117,7 +130,7 @@
         .container {
             position: relative;
             width: 850px;
-            height: 580px;
+            height: 620px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
@@ -128,7 +141,6 @@
             z-index: 10;
         }
 
-        /* Form Content Presentation Desks */
         .form-box {
             position: absolute;
             right: 0;
@@ -170,17 +182,30 @@
             flex-direction: column;
         }
 
-        .brand-logo {
-            width: 54px;
-            height: 54px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+        .logo-wrapper {
+            width: 64px;
+            height: 64px;
+            background: #ffffff;
+            border-radius: 14px;
+            margin-bottom: 16px;
             align-self: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--accent);
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
+        .brand-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
         form h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 600;
             text-align: center;
             margin-bottom: 6px;
@@ -191,18 +216,18 @@
             font-size: 13px;
             color: var(--text-muted);
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
-        /* Input Block Fields */
         .input-box {
             position: relative;
-            margin-bottom: 16px;
+            width: 100%;
+            margin-bottom: 14px;
         }
 
         .input-box input {
             width: 100%;
-            padding: 14px 50px 14px 18px;
+            padding: 14px 75px 14px 18px;
             background: var(--input-bg);
             border: 1px solid var(--glass-border);
             border-radius: 10px;
@@ -218,7 +243,7 @@
             background: rgba(15, 23, 42, 0.2);
         }
 
-        .input-box i {
+        .input-box i.input-icon {
             position: absolute;
             right: 18px;
             top: 50%;
@@ -226,15 +251,32 @@
             font-size: 18px;
             color: var(--text-muted);
             transition: color 0.2s;
+            pointer-events: none;
         }
 
-        .input-box input:focus ~ i {
+        .toggle-password-view {
+            position: absolute;
+            right: 44px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 10;
+        }
+
+        .toggle-password-view:hover {
+            color: var(--text-main);
+        }
+
+        .input-box input:focus ~ i.input-icon {
             color: var(--accent);
         }
 
         .forgot-link {
             text-align: right;
-            margin: -4px 0 18px;
+            margin: -4px 0 14px;
         }
 
         .forgot-link a {
@@ -247,7 +289,6 @@
             text-decoration: underline;
         }
 
-        /* Buttons */
         .btn {
             width: 100%;
             height: 48px;
@@ -275,12 +316,11 @@
             font-size: 12px;
             color: var(--text-muted);
             text-align: center;
-            margin: 16px 0;
+            margin: 14px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Social Integrations Elements */
         .social-icons {
             display: flex;
             justify-content: center;
@@ -342,7 +382,7 @@
             position: absolute;
             width: 50%;
             height: 100%;
-            color: var(--text-main);
+            color: var(--toggle-text-pure);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -351,7 +391,7 @@
             text-align: center;
             z-index: 2;
             pointer-events: all;
-            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), color 0.3s ease;
         }
 
         .toggle-panel h1 {
@@ -363,23 +403,25 @@
 
         .toggle-panel p {
             font-size: 14px;
-            color: var(--text-muted);
+            color: var(--toggle-text-muted);
             margin-bottom: 24px;
             line-height: 1.5;
+            transition: color 0.3s ease;
         }
 
         .toggle-panel .btn {
-            width: 150px;
-            height: 44px;
+            width: 180px;
+            height: 46px;
             background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
+            border: 2px solid var(--toggle-btn-border);
+            color: var(--toggle-btn-text);
             box-shadow: none;
+            transition: all 0.3s ease;
         }
 
         .toggle-panel .btn:hover {
-            background: var(--accent);
-            color: #02040a;
+            background: var(--toggle-btn-hover-bg);
+            color: var(--toggle-btn-hover-text);
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
@@ -405,7 +447,6 @@
             transition-delay: 0.6s;
         }
 
-        /* Diagnostics Alert Panel */
         .msg-alert {
             position: absolute;
             top: 20px;
@@ -424,9 +465,8 @@
         .msg-alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid #f87171; color: #f87171; }
         .msg-alert.success { background: rgba(16, 185, 129, 0.15); border: 1px solid #34d399; color: #34d399; }
 
-        /* Responsive Layouts Matrix */
         @media screen and (max-width: 880px) {
-            .container { width: 95%; height: 620px; }
+            .container { width: 95%; height: auto; min-height: 580px; }
         }
     </style>
 </head>
@@ -443,23 +483,28 @@
         
         <div class="form-box login">
             <form id="loginForm" onsubmit="executeAuth(event, 'login')">
-                <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                <div class="logo-wrapper">
+                    <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                </div>
                 <h1>Login</h1>
                 <p class="form-subtitle">Log in to your account</p>
                 
                 <div class="input-box">
                     <input type="email" id="loginEmail" placeholder="Email Address" required autocomplete="email">
-                    <i class='bx bxs-envelope'></i>
+                    <i class='bx bxs-envelope input-icon'></i>
                 </div>
+                
                 <div class="input-box">
                     <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
-                    <i class='bx bxs-lock-alt'></i>
+                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('loginPassword', this)"></i>
+                    <i class='bx bxs-lock-alt input-icon'></i>
                 </div>
+                
                 <div class="forgot-link">
                     <a href="#">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
-                <p>Third-Party Secure Linkages</p>
+                <p>or login with social platforms</p>
                 <div class="social-icons">
                     <a href="#"><i class='bx bxl-google'></i></a>
                     <a href="#"><i class='bx bxl-github'></i></a>
@@ -470,31 +515,36 @@
 
         <div class="form-box register">
             <form id="registerForm" onsubmit="executeAuth(event, 'register')">
-                <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                <div class="logo-wrapper">
+                    <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
+                </div>
                 <h1>Create New Profile</h1>
                 <p class="form-subtitle">Create your account in the Zytherion AI ecosystem</p>
                 
                 <div class="input-box">
                     <input type="text" id="regUser" placeholder="User Name" required autocomplete="name">
-                    <i class='bx bxs-user'></i>
+                    <i class='bx bxs-user input-icon'></i>
                 </div>
+                
                 <div class="input-box">
                     <input type="email" id="regEmail" placeholder="Email Address" required autocomplete="email">
-                    <i class='bx bxs-envelope'></i>
+                    <i class='bx bxs-envelope input-icon'></i>
                 </div>
+                
                 <div class="input-box">
                     <input type="password" id="regPassword" placeholder="Password" required autocomplete="new-password">
-                    <i class='bx bxs-lock-alt'></i>
+                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('regPassword', this)"></i>
+                    <i class='bx bxs-lock-alt input-icon'></i>
                 </div>
+                
                 <div class="input-box">
                     <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required autocomplete="new-password">
-                    <i class='bx bxs-lock-alt'></i>
+                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('regConfirmPassword', this)"></i>
+                    <i class='bx bxs-lock-alt input-icon'></i>
                 </div>
-                <div class="forgot-link">
-                    <a href="#">Forgot password?</a>
-                </div>
-                <button type="submit" class="btn">Create New Account</button>
-                <p>Register via Alternate Methods</p>
+                
+                <button type="submit" class="btn" style="margin-top: 6px;">Create New Account</button>
+                <p>or register with social platforms</p>
                 <div class="social-icons">
                     <a href="#"><i class='bx bxl-google'></i></a>
                     <a href="#"><i class='bx bxl-github'></i></a>
@@ -525,11 +575,9 @@
         const statusBox = document.getElementById("statusBox");
         const themeToggleBtn = document.getElementById("themeToggleBtn");
 
-        // Sliding view assignments
         registerBtn.addEventListener('click', () => { container.classList.add('active'); });
         loginBtn.addEventListener('click', () => { container.classList.remove('active'); });
 
-        // Absolute light/dark mode operational toggle lifecycle engine
         const savedTheme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
 
@@ -539,6 +587,21 @@
             document.documentElement.setAttribute("data-theme", newTheme);
             localStorage.setItem("theme", newTheme);
         });
+
+        function togglePasswordMask(inputTargetId, dynamicIcon) {
+            const targetInput = document.getElementById(inputTargetId);
+            if (targetInput.type === "password") {
+                targetInput.type = "text";
+                dynamicIcon.classList.remove("bx-hide");
+                dynamicIcon.classList.add("bx-show");
+                dynamicIcon.style.color = "var(--accent)";
+            } else {
+                targetInput.type = "password";
+                dynamicIcon.classList.remove("bx-show");
+                dynamicIcon.classList.add("bx-hide");
+                dynamicIcon.style.color = "var(--text-muted)";
+            }
+        }
 
         function printAlert(msg, level) {
             statusBox.innerText = msg;
@@ -561,6 +624,12 @@
                 const username = document.getElementById("regUser").value.trim();
                 const email = document.getElementById("regEmail").value.trim();
                 const password = document.getElementById("regPassword").value;
+                const confirmPassword = document.getElementById("regConfirmPassword").value;
+
+                if (password !== confirmPassword) {
+                    printAlert("Validation Failed: Passwords do not match.", "error");
+                    return;
+                }
 
                 if (password.length < 8) {
                     printAlert("Security Policy Failure: Cipher key must be at least 8 elements long.", "error");
