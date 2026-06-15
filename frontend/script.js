@@ -79,7 +79,9 @@ function renderActiveChatLogs() {
     
     // Default boot onboarding interface template if the chosen session workspace has no messages
     if (!activeSession || activeSession.messages.length === 0) {
-        appendChatBubbleUI(`🚀 ZYTHERION\n\nThe Next Generation of Artificial Intelligence\n\nAnalyze deeper. Build faster. Think bigger.\nPowered by adaptive intelligence, advanced reasoning, and limitless creativity.\n\nYour imagination is the only limit.\n\n➜ 🧠 Enter the future ✨`, "bot");
+        appendChatBubbleUI(`🚀 ZYTHERION: Think Bigger. Build Faster.
+The next-gen AI powered by adaptive reasoning and limitless creativity. Your imagination is the only limit.
+➜ 🧠 Enter the future ✨`, "bot");
         return;
     }
 
