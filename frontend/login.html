@@ -12,8 +12,6 @@
             --border-glow: rgba(255, 255, 255, 0.05);
             --border-focus: rgba(197, 160, 89, 0.4);
             --brand-primary: linear-gradient(135deg, #dfc07d 0%, #6366f1 50%, #9063f1 100%);
-            --user-gradient: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
-            --bot-gradient: rgba(17, 27, 47, 0.85);
             --text-pure: #ffffff;
             --text-smooth: #f1f5f9;
             --text-muted: #64748b;
@@ -65,7 +63,7 @@
             50% { opacity: 1; }
         }
 
-        .auth-wrapper {
+        .container {
             width: 100%;
             max-width: 440px;
             padding: 24px;
@@ -94,7 +92,19 @@
             background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.3), transparent);
         }
 
-        .auth-card h2 {
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #dfc07d 0%, #6366f1 50%, #9063f1 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        h2 {
             font-size: 30px;
             font-weight: 700;
             letter-spacing: -0.5px;
@@ -105,13 +115,13 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .auth-subtitle {
+        .subtitle {
             color: var(--text-muted);
             font-size: 14px;
             margin-bottom: 35px;
         }
 
-        .error-alert {
+        .error-msg {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
@@ -120,19 +130,18 @@
             margin-bottom: 20px;
             font-size: 13px;
             display: none;
-            animation: slideDown 0.3s ease;
         }
 
-        .error-alert.show {
+        .error-msg.show {
             display: block;
         }
 
-        .input-group {
+        .form-group {
             margin-bottom: 24px;
             text-align: left;
         }
 
-        .input-group label {
+        label {
             display: block;
             font-size: 11px;
             font-weight: 600;
@@ -142,7 +151,7 @@
             letter-spacing: 0.8px;
         }
 
-        .auth-input {
+        input {
             width: 100%;
             padding: 15px 18px;
             background: rgba(4, 6, 10, 0.5);
@@ -154,16 +163,16 @@
             transition: all 0.2s ease;
         }
 
-        .auth-input:focus {
+        input:focus {
             border-color: var(--text-gold);
             box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
         }
 
-        .auth-input::placeholder {
+        input::placeholder {
             color: var(--text-muted);
         }
 
-        .auth-btn {
+        .btn {
             width: 100%;
             padding: 16px;
             border: none;
@@ -176,66 +185,57 @@
             transition: all 0.2s ease;
             margin-top: 10px;
             box-shadow: 0 8px 20px -6px rgba(197, 160, 89, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
-        .auth-btn:hover {
+        .btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 12px 24px -6px rgba(197, 160, 89, 0.45);
         }
 
-        .auth-btn:disabled {
+        .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .social-divider {
+        .divider {
             margin: 24px 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-muted);
+            text-align: center;
             font-size: 12px;
+            color: var(--text-muted);
+            position: relative;
         }
 
-        .social-divider::before,
-        .social-divider::after {
+        .divider::before,
+        .divider::after {
             content: "";
-            flex: 1;
+            position: absolute;
+            top: 50%;
+            width: 35%;
             height: 1px;
             background: var(--border-glow);
         }
 
-        .social-login {
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .social-buttons {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
+            margin-top: 24px;
         }
 
         .social-btn {
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             border-radius: 12px;
             border: 1px solid var(--border-glow);
-            background: rgba(4, 6, 10, 0.5);
+            background: rgba(255, 255, 255, 0.03);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -250,36 +250,30 @@
             transform: translateY(-2px);
         }
 
-        .social-btn:active {
-            transform: translateY(0);
-        }
-
-        .auth-footer {
+        .footer {
             margin-top: 28px;
             font-size: 13.5px;
             color: var(--text-muted);
         }
 
-        .auth-footer a {
+        .footer a {
             color: var(--text-gold);
             text-decoration: none;
             font-weight: 500;
         }
 
-        .auth-footer a:hover {
+        .footer a:hover {
             text-decoration: underline;
         }
 
         .signup-section {
-            margin-top: 28px;
+            margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid var(--border-glow);
-            text-align: center;
+            font-size: 13px;
         }
 
         .signup-section p {
-            font-size: 13px;
-            color: var(--text-muted);
             margin-bottom: 12px;
         }
 
@@ -301,34 +295,23 @@
             border-color: var(--text-gold);
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @media (max-width: 480px) {
             .auth-card {
                 padding: 30px 20px;
             }
 
-            .auth-card h2 {
+            h2 {
                 font-size: 24px;
             }
 
-            .auth-btn {
+            .btn {
                 font-size: 14px;
                 padding: 14px;
             }
 
             .social-btn {
-                width: 45px;
-                height: 45px;
+                width: 48px;
+                height: 48px;
                 font-size: 20px;
             }
         }
@@ -336,118 +319,96 @@
 </head>
 <body>
 
-<div class="auth-wrapper">
+<div class="container">
     <div class="auth-card">
+        <div class="logo">🚀</div>
+        
         <h2>Login</h2>
-        <p class="auth-subtitle">LOG IN TO YOUR ACCOUNT</p>
+        <p class="subtitle">LOG IN TO YOUR ACCOUNT</p>
 
-        <div id="errorAlert" class="error-alert"></div>
+        <div class="error-msg" id="errorMsg"></div>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="input-group">
-                <label for="email">Email Address</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    class="auth-input" 
-                    placeholder="Enter your email"
-                    required
-                    autocomplete="email"
-                >
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
             </div>
 
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="auth-input" 
-                    placeholder="Enter your password"
-                    required
-                    autocomplete="current-password"
-                >
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="auth-btn" id="loginBtn">
-                <span>Login</span>
-            </button>
+            <button type="submit" class="btn" id="submitBtn">Login</button>
         </form>
 
-        <!-- Social Login Section -->
-        <div class="social-divider">OR LOGIN WITH SOCIAL PLATFORMS</div>
-        <div class="social-login">
-            <button type="button" class="social-btn" title="Login with Google" onclick="alert('🔜 Coming Soon! Google OAuth integration (Phase 7)')">
+        <div class="divider">OR LOGIN WITH SOCIAL PLATFORMS</div>
+
+        <div class="social-buttons">
+            <button class="social-btn" title="Google" onclick="comingSoon('Google OAuth')">
                 🔵
             </button>
-            <button type="button" class="social-btn" title="Login with GitHub" onclick="alert('🔜 Coming Soon! GitHub OAuth integration (Phase 7)')">
+            <button class="social-btn" title="GitHub" onclick="comingSoon('GitHub OAuth')">
                 ⚫
             </button>
-            <button type="button" class="social-btn" title="Login with LinkedIn" onclick="alert('🔜 Coming Soon! LinkedIn OAuth integration (Phase 7)')">
+            <button class="social-btn" title="LinkedIn" onclick="comingSoon('LinkedIn OAuth')">
                 🔷
             </button>
         </div>
 
-        <div class="auth-footer">
-            <a href="#" onclick="alert('🔜 Coming Soon! Password reset (Phase 6)'); return false;">Forgot password?</a>
+        <div class="footer">
+            <a href="#" onclick="comingSoon('Password Reset'); return false;">Forgot password?</a>
         </div>
 
         <div class="signup-section">
             <p>Don't have an account?</p>
-            <button type="button" class="signup-btn" onclick="goToSignup()">Create New Account</button>
+            <button class="signup-btn" onclick="comingSoon('Sign Up')">Create New Account</button>
         </div>
     </div>
 </div>
 
 <script>
-    // BACKEND URL
-    const BACKEND_URL = "https://aegisai-backend-ifvc.onrender.com";
+    const API_URL = "https://aegisai-backend-ifvc.onrender.com";
 
-    function showError(message) {
-        const alert = document.getElementById("errorAlert");
-        alert.textContent = "❌ " + message;
-        alert.classList.add("show");
-        setTimeout(() => alert.classList.remove("show"), 5000);
+    function showError(msg) {
+        const el = document.getElementById("errorMsg");
+        el.textContent = "❌ " + msg;
+        el.classList.add("show");
     }
 
-    function setButtonLoading(loading) {
-        const btn = document.getElementById("loginBtn");
-        const span = btn.querySelector("span");
-        if (loading) {
-            btn.disabled = true;
-            span.innerHTML = '<span class="spinner"></span> Logging in...';
-        } else {
-            btn.disabled = false;
-            span.textContent = "Login";
-        }
+    function hideError() {
+        document.getElementById("errorMsg").classList.remove("show");
     }
 
-    async function handleLogin(event) {
-        event.preventDefault();
+    async function handleLogin(e) {
+        e.preventDefault();
+        hideError();
 
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
+        const btn = document.getElementById("submitBtn");
 
         if (!email || !password) {
-            showError("Please enter both email and password");
+            showError("Please enter email and password");
             return;
         }
 
-        setButtonLoading(true);
+        btn.disabled = true;
+        btn.textContent = "Logging in...";
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
+            const data = await res.json();
 
-            if (!response.ok) {
+            if (!res.ok) {
                 showError(data.message || "Login failed");
-                setButtonLoading(false);
+                btn.disabled = false;
+                btn.textContent = "Login";
                 return;
             }
 
@@ -458,21 +419,19 @@
 
             window.location.href = "index.html";
 
-        } catch (error) {
-            showError("Connection error. Check your internet.");
-            setButtonLoading(false);
+        } catch (err) {
+            showError("Connection error. Check internet.");
+            btn.disabled = false;
+            btn.textContent = "Login";
         }
     }
 
-    function goToSignup() {
-        alert("To create an account, contact: zytherionai@gmail.com");
+    function comingSoon(feature) {
+        alert(`🔜 ${feature} coming in next phase!`);
     }
 
-    // Enter key support
-    document.getElementById("password").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            handleLogin(new Event('submit'));
-        }
+    document.getElementById("password").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") document.querySelector("form").dispatchEvent(new Event("submit"));
     });
 </script>
 
