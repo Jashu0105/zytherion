@@ -17,8 +17,6 @@
             --chat-user-bg: rgba(209, 168, 92, 0.12);
             --chat-bot-bg: rgba(255, 255, 255, 0.02);
             --sidebar-bg: rgba(10, 15, 30, 0.7);
-            --error-color: #ef4444;
-            --success-color: #10b981;
         }
 
         [data-theme="light"] {
@@ -51,96 +49,7 @@
             overflow: hidden;
         }
 
-        /* ================= MODAL STYLES ================= */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.3s ease;
-        }
-
-        .modal-content h2 {
-            font-size: 24px;
-            margin-bottom: 12px;
-            color: var(--text-main);
-        }
-
-        .modal-content p {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .modal-btn-primary {
-            background: var(--accent);
-            color: #02040a;
-        }
-
-        .modal-btn-primary:hover {
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: translateY(-2px);
-        }
-
-        .modal-btn-secondary {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-        }
-
-        .modal-btn-secondary:hover {
-            background: var(--glass-bg);
-            border-color: var(--accent);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ================= SIDEBAR ================= */
+        /* Sidebar Navigation Layout */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -151,7 +60,6 @@
             flex-direction: column;
             padding: 24px 16px;
             z-index: 10;
-            overflow: hidden;
         }
 
         .sidebar-header {
@@ -199,14 +107,13 @@
             border-color: var(--glass-border);
         }
 
-        /* ================= MAIN WORKSPACE ================= */
+        /* Main App Workspace Architecture */
         .main-workspace {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             height: 100%;
-            min-width: 0;
         }
 
         .top-bar {
@@ -273,7 +180,7 @@
             color: var(--text-main);
         }
 
-        /* ================= CHAT AREA ================= */
+        /* Chat Streams Container */
         .chat-viewports {
             flex: 1;
             overflow-y: auto;
@@ -315,7 +222,7 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* ================= INPUT AREA ================= */
+        /* Input Deck Frame Area */
         .input-dock {
             padding: 20px 60px 10px 60px;
             display: flex;
@@ -383,10 +290,6 @@
             user-select: none;
         }
 
-        .char-counter.warning {
-            color: var(--error-color);
-        }
-
         .send-action-btn {
             background: var(--accent);
             color: #02040a;
@@ -411,7 +314,7 @@
             transform: translateY(0);
         }
 
-        /* ================= FOOTER ================= */
+        /* Footer Utilities / Support & Disclaimer System */
         .workspace-footer {
             display: flex;
             justify-content: space-between;
@@ -447,13 +350,11 @@
             letter-spacing: 0.2px;
         }
 
-        /* ================= ANIMATIONS ================= */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ================= RESPONSIVE DESIGN ================= */
         @media (max-width: 1024px) {
             .sidebar {
                 width: 220px;
@@ -532,6 +433,8 @@
 
             .controls-group {
                 gap: 8px;
+                width: 100%;
+                justify-content: flex-end;
             }
 
             .ui-btn {
@@ -582,15 +485,6 @@
                 padding: 0 4px 8px 4px;
                 font-size: 11px;
             }
-
-            .modal-content {
-                padding: 24px;
-                max-width: 90%;
-            }
-
-            .modal-content h2 {
-                font-size: 20px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -606,11 +500,6 @@
 
             .brand-title {
                 font-size: 14px;
-            }
-
-            .controls-group {
-                width: 100%;
-                justify-content: space-between;
             }
 
             .chat-viewports {
@@ -643,21 +532,7 @@
 </head>
 <body>
 
-    <!-- Email Verification Modal -->
-    <div class="modal-overlay" id="emailVerificationModal">
-        <div class="modal-content">
-            <h2>📧 Verify Your Email</h2>
-            <p>We've sent a verification link to your email. Please check your inbox and click the link to verify your account.</p>
-            <p><strong>Don't see it?</strong> Check your spam folder or request a new verification email.</p>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-secondary" onclick="closeEmailVerificationModal()">Got It</button>
-                <button class="modal-btn modal-btn-primary" onclick="resendVerificationEmail()">Resend Email</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Sidebar -->
-    <div class="sidebar">       
+  <div class="sidebar">       
         <div class="sidebar-header">Local Workspaces</div>
         
         <button class="ui-btn" id="newChatBtn" style="justify-content: center; margin-bottom: 16px; font-weight: 600; border-color: var(--accent);">
@@ -670,15 +545,15 @@
         </button>
     </div>
     
-    <!-- Main Workspace -->
     <div class="main-workspace">
-        <!-- Top Bar -->
         <div class="top-bar">
             <div class="brand-title">
                 <img src="logo.jpeg" alt="Zytherion Logo">
                 <span>Zytherion <em>AI</em></span>
             </div>
             <div class="controls-group">
+                <a href="profile.html" class="ui-btn" title="View Your Profile">👤 Profile</a>
+                <a href="settings.html" class="ui-btn" title="Settings">⚙️ Settings</a>
                 <a href="mailto:zytherionai@gmail.com?subject=Platform%20Feedback%20-%20Active%20Console" class="ui-btn" title="Submit Platform Feedback">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <span>Feedback</span>
@@ -688,10 +563,8 @@
             </div>
         </div>
 
-        <!-- Chat Container -->
         <div class="chat-viewports" id="chat-container"></div>
 
-        <!-- Input Area -->
         <div class="input-dock">
             <div class="input-wrapper">
                 <div class="textarea-container">
@@ -706,7 +579,6 @@
                 <button class="send-action-btn" id="send-btn">Send</button>
             </div>
             
-            <!-- Footer -->
             <div class="workspace-footer">
                 <div class="support-channels">
                     <a href="mailto:zytherionai@gmail.com" class="support-icon-link" title="Email Support">
@@ -722,7 +594,7 @@
     </div>
 
     <script>
-        // ================= THEME TOGGLE ================= 
+        // Core Visual State Management (Theme Execution)
         const themeToggleBtn = document.getElementById("themeToggleBtn");
         const savedTheme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -734,40 +606,11 @@
             localStorage.setItem("theme", newTheme);
         });
 
-        // ================= LOGOUT ================= 
+        // Authentication Eviction Routing
         document.getElementById("logoutBtn").addEventListener("click", () => {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             window.location.href = "login.html";
-        });
-
-        // ================= EMAIL VERIFICATION MODAL ================= 
-        function showEmailVerificationModal() {
-            const modal = document.getElementById("emailVerificationModal");
-            modal.classList.add("active");
-        }
-
-        function closeEmailVerificationModal() {
-            const modal = document.getElementById("emailVerificationModal");
-            modal.classList.remove("active");
-        }
-
-        function resendVerificationEmail() {
-            alert("Please check your email for the verification link. This feature will be implemented with Resend integration.");
-            closeEmailVerificationModal();
-        }
-
-        // Check if user just registered
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get("emailVerification") === "true") {
-            showEmailVerificationModal();
-        }
-
-        // Close modal when clicking outside
-        document.getElementById("emailVerificationModal").addEventListener("click", (e) => {
-            if (e.target.id === "emailVerificationModal") {
-                closeEmailVerificationModal();
-            }
         });
     </script>
     <script src="script.js"></script>

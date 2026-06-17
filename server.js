@@ -21,33 +21,30 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === "production" 
     ? "https://zytherion-topaz.vercel.app" 
-    : "http://localhost:3000",
+    : "*",
   credentials: true
 }));
 
 app.use(express.json()); 
 
 /* ================= RATE LIMITING ================= */
-// Login attempt limiter - 5 attempts per 15 minutes
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Maximum 5 attempts
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: "Too many login attempts. Please try again after 15 minutes.",
   standardHeaders: true,
   legacyHeaders: false
 });
 
-// Registration limiter - 3 per hour per IP
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3, // Maximum 3 registrations
+  windowMs: 60 * 60 * 1000,
+  max: 3,
   message: "Too many accounts created from this IP. Try again later.",
   skip: (req) => process.env.NODE_ENV !== "production"
 });
 
-// Chat message limiter - 30 messages per minute
 const chatLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 30,
   message: "Too many messages. Please slow down.",
   standardHeaders: true,
@@ -112,6 +109,48 @@ const conversationSchema = new mongoose.Schema({
 });
 const Conversation = mongoose.model("Conversation", conversationSchema);
 
+const userSettingsSchema = new mongoose.Schema({
+  userId: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  theme: {
+    type: String,
+    enum: ["dark", "light"],
+    default: "dark"
+  },
+  notifications: {
+    type: Boolean,
+    default: true
+  },
+  autoDeleteChat: {
+    type: Boolean,
+    default: false
+  },
+  autoDeleteAfterDays: {
+    type: Number,
+    default: 30,
+    min: 7,
+    max: 365
+  },
+  language: {
+    type: String,
+    enum: ["en", "es", "fr", "de", "hi"],
+    default: "en"
+  },
+  enableExport: {
+    type: Boolean,
+    default: true
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const UserSettings = mongoose.model("UserSettings", userSettingsSchema);
+
 /* ================= JWT VERIFY MIDDLEWARE ================= */
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -167,7 +206,6 @@ const validateLogin = [
     .withMessage("Password is required")
 ];
 
-// Validation error handler
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -197,7 +235,6 @@ CRITICAL CONTEXT & KNOWLEDGE OVERRIDE:
 - If a user asks you about your knowledge cutoff, limitations, or timeline, proudly explain that while your base training ended in 2023, you are equipped with live search matrices that allow you to browse the live web and pull current information in real-time as of ${now.getFullYear()}.`;
 }
 
-// Generate access token (short-lived: 1 hour)
 function generateAccessToken(userId, email) {
   return jwt.sign(
     { id: userId, email: email },
@@ -206,13 +243,25 @@ function generateAccessToken(userId, email) {
   );
 }
 
-// Generate refresh token (long-lived: 7 days)
 function generateRefreshToken(userId) {
   return jwt.sign(
     { id: userId },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "7d" }
   );
+}
+
+function calculateAccountAge(createdDate) {
+  const now = new Date();
+  const created = new Date(createdDate);
+  const diffTime = Math.abs(now - created);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 1) return "Less than 1 day";
+  if (diffDays === 1) return "1 day";
+  if (diffDays < 30) return `${diffDays} days`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
+  return `${Math.floor(diffDays / 365)} years`;
 }
 
 /* ================= AUTH ROUTES ================= */
@@ -222,40 +271,37 @@ app.post("/api/auth/register", registerLimiter, validateRegister, handleValidati
   try {
     const { email, password } = req.body;
     
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "❌ Email already registered. Please login or use a different email." });
     }
     
-    // Hash password with 12 salt rounds
     const SALT_ROUNDS = 12;
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
-    // Generate verification token
     const verificationToken = jwt.sign(
       { email: email },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
     
-    // Create new user
     const newUser = new User({ 
       email, 
       password: hashedPassword,
+      verified: false,
       verificationToken: verificationToken,
-      verificationTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      verificationTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
     
     await newUser.save();
     
-    // TODO: Send verification email using Resend (Step 3)
     console.log(`📧 Verification email would be sent to: ${email}`);
     console.log(`🔗 Verification link: https://your-frontend.com/verify?token=${verificationToken}`);
     
     res.status(201).json({ 
-      message: "✅ Registration successful! Check your email to verify your account.",
-      requiresEmailVerification: true
+      message: "✅ Registration successful! Email verification is optional - you can login directly.",
+      requiresEmailVerification: false,
+      email: email
     });
     
   } catch (error) {
@@ -264,7 +310,7 @@ app.post("/api/auth/register", registerLimiter, validateRegister, handleValidati
   }
 });
 
-// VERIFY EMAIL ROUTE
+// VERIFY EMAIL ROUTE (Optional)
 app.get("/api/auth/verify/:token", async (req, res) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
@@ -278,7 +324,6 @@ app.get("/api/auth/verify/:token", async (req, res) => {
       return res.status(400).json({ message: "⚠️ Email already verified" });
     }
     
-    // Mark user as verified
     await User.updateOne(
       { email: decoded.email },
       { 
@@ -289,7 +334,7 @@ app.get("/api/auth/verify/:token", async (req, res) => {
     );
     
     res.json({ 
-      message: "✅ Email verified successfully! You can now login.",
+      message: "✅ Email verified successfully!",
       redirectUrl: "/login.html"
     });
     
@@ -301,36 +346,24 @@ app.get("/api/auth/verify/:token", async (req, res) => {
   }
 });
 
-// LOGIN ROUTE
+// LOGIN ROUTE - FIXED: Allow login regardless of verification status
 app.post("/api/auth/login", loginLimiter, validateLogin, handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "❌ Invalid email or password" });
     }
     
-    // Check if email is verified
-    if (!user.verified) {
-      return res.status(403).json({ 
-        message: "❌ Email not verified. Check your email for verification link.",
-        requiresEmailVerification: true
-      });
-    }
-    
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "❌ Invalid email or password" });
     }
     
-    // Generate tokens
     const accessToken = generateAccessToken(user._id, user.email);
     const refreshToken = generateRefreshToken(user._id);
     
-    // Save refresh token to database
     await User.updateOne(
       { _id: user._id },
       { 
@@ -343,10 +376,11 @@ app.post("/api/auth/login", loginLimiter, validateLogin, handleValidationErrors,
       message: "✅ Login successful!",
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: 3600, // 1 hour in seconds
+      expiresIn: 3600,
       user: {
         id: user._id,
-        email: user.email
+        email: user.email,
+        verified: user.verified
       }
     });
     
@@ -365,16 +399,13 @@ app.post("/api/auth/refresh", async (req, res) => {
       return res.status(401).json({ message: "❌ Refresh token required" });
     }
     
-    // Verify refresh token
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     
-    // Find user and verify refresh token matches
     const user = await User.findById(decoded.id);
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(401).json({ message: "❌ Invalid refresh token" });
     }
     
-    // Generate new access token
     const newAccessToken = generateAccessToken(user._id, user.email);
     
     res.json({ 
@@ -390,14 +421,9 @@ app.post("/api/auth/refresh", async (req, res) => {
     res.status(401).json({ message: "❌ Invalid refresh token" });
   }
 });
- /* ================= ADDITIONAL BACKEND ROUTES ================= */
-/* ADD THESE ROUTES TO YOUR server.js FILE */
 
-// ============================================================
-// USER PROFILE ROUTES
-// ============================================================
+/* ================= USER PROFILE ROUTES ================= */
 
-// GET USER PROFILE DATA
 app.get("/api/user/profile", authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -406,7 +432,6 @@ app.get("/api/user/profile", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "❌ User not found" });
     }
 
-    // Format last login
     const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "Never";
     const createdAt = new Date(user.createdAt).toLocaleString();
 
@@ -428,12 +453,10 @@ app.get("/api/user/profile", authenticateToken, async (req, res) => {
   }
 });
 
-// CHANGE PASSWORD
 app.post("/api/user/change-password", authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({ message: "❌ All fields required" });
     }
@@ -454,19 +477,16 @@ app.post("/api/user/change-password", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "❌ New password must be different from current" });
     }
 
-    // Find user
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "❌ User not found" });
     }
 
-    // Verify current password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "❌ Current password is incorrect" });
     }
 
-    // Hash and update new password
     const SALT_ROUNDS = 12;
     const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
     
@@ -488,7 +508,6 @@ app.get("/api/user/settings", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Get or create default settings
     let settings = await UserSettings.findOne({ userId });
     
     if (!settings) {
@@ -521,7 +540,6 @@ app.post("/api/user/settings", authenticateToken, async (req, res) => {
     const { theme, notifications, autoDeleteChat, autoDeleteAfterDays, language, enableExport } = req.body;
     const userId = req.user.id;
 
-    // Validation
     if (theme && !["dark", "light"].includes(theme)) {
       return res.status(400).json({ message: "❌ Invalid theme" });
     }
@@ -530,7 +548,6 @@ app.post("/api/user/settings", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "❌ Auto-delete days must be between 7 and 365" });
     }
 
-    // Update settings
     const settings = await UserSettings.findOneAndUpdate(
       { userId: userId },
       {
@@ -565,7 +582,6 @@ app.post("/api/user/delete-account", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "❌ Password required to delete account" });
     }
 
-    // Verify password
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "❌ User not found" });
@@ -576,7 +592,6 @@ app.post("/api/user/delete-account", authenticateToken, async (req, res) => {
       return res.status(401).json({ message: "❌ Password is incorrect" });
     }
 
-    // Delete user data
     await User.deleteOne({ _id: req.user.id });
     await Conversation.deleteOne({ userId: req.user.id });
     await UserSettings.deleteOne({ userId: req.user.id });
@@ -595,7 +610,6 @@ app.post("/api/user/delete-account", authenticateToken, async (req, res) => {
 // LOGOUT FROM ALL DEVICES
 app.post("/api/user/logout-all-devices", authenticateToken, async (req, res) => {
   try {
-    // Clear all refresh tokens for this user
     await User.updateOne(
       { _id: req.user.id },
       { refreshToken: null }
@@ -612,75 +626,12 @@ app.post("/api/user/logout-all-devices", authenticateToken, async (req, res) => 
   }
 });
 
-// ============================================================
-// HELPER FUNCTION
-// ============================================================
-
-function calculateAccountAge(createdDate) {
-  const now = new Date();
-  const created = new Date(createdDate);
-  const diffTime = Math.abs(now - created);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  if (diffDays < 1) return "Less than 1 day";
-  if (diffDays === 1) return "1 day";
-  if (diffDays < 30) return `${diffDays} days`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
-  return `${Math.floor(diffDays / 365)} years`;
-}
-
-/* ================= USER SETTINGS SCHEMA ================= */
-/* ADD THIS TO YOUR server.js (after other schemas) */
-
-const userSettingsSchema = new mongoose.Schema({
-  userId: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  theme: {
-    type: String,
-    enum: ["dark", "light"],
-    default: "dark"
-  },
-  notifications: {
-    type: Boolean,
-    default: true
-  },
-  autoDeleteChat: {
-    type: Boolean,
-    default: false
-  },
-  autoDeleteAfterDays: {
-    type: Number,
-    default: 30,
-    min: 7,
-    max: 365
-  },
-  language: {
-    type: String,
-    enum: ["en", "es", "fr", "de", "hi"],
-    default: "en"
-  },
-  enableExport: {
-    type: Boolean,
-    default: true
-  },
-  lastUpdated: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-const UserSettings = mongoose.model("UserSettings", userSettingsSchema);
-
 /* ================= CHAT ROUTE ================= */
 app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.user.id;
 
-    // Validate message
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ message: "❌ Valid message required" });
     }
@@ -693,13 +644,11 @@ app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "❌ Message too long (max 5000 characters)" });
     }
 
-    // Find or create conversation
     let conversation = await Conversation.findOne({ userId });
     if (!conversation) {
       conversation = new Conversation({ userId, messages: [] });
     }
 
-    // Add user message to conversation
     conversation.messages.push({ role: "user", content: message });
     const recentMessages = conversation.messages.slice(-10);
 
@@ -711,7 +660,6 @@ app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
     if (needsLiveContext) {
       const secureQuery = `${message} latest verified news updates 2025 2026`;
       
-      // Strategy A: Primary Search Layer (Tavily)
       if (process.env.TAVILY_API_KEY) {
         try {
           const tavilyResponse = await axios.post("https://api.tavily.com/search", {
@@ -726,11 +674,10 @@ app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
             console.log("✅ Context parsed successfully via Tavily Engine.");
           }
         } catch (tavilyErr) {
-          console.warn("⚠️ Tavily lookup bypassed. Diverting to backup engine...");
+          console.warn("⚠️ Tavily lookup bypassed or credit exhausted.");
         }
       }
 
-      // Strategy B: Backup Search Layer (Serper)
       if (!searchResults && process.env.SERPER_API_KEY) {
         try {
           const serperResponse = await axios.post(
@@ -770,7 +717,6 @@ ${searchResults}
 USER_QUESTION: ${message}`;
     }
 
-    // Call OpenRouter API
     const aiResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -791,13 +737,11 @@ USER_QUESTION: ${message}`;
       }
     );
 
-    // Validate AI response
     const reply = aiResponse.data?.choices?.[0]?.message?.content;
     if (!reply) {
       return res.status(500).json({ message: "❌ No response from AI engine. Try again." });
     }
 
-    // Save conversation
     conversation.messages.push({ role: "assistant", content: reply });
     await conversation.save();
 
@@ -810,7 +754,6 @@ USER_QUESTION: ${message}`;
   } catch (error) {
     console.error("❌ CHAT ROUTE ERROR:", error.message);
     
-    // Specific error messages
     if (error.response?.status === 401) {
       return res.status(401).json({ message: "❌ AI API authentication failed. Check your API keys." });
     }
