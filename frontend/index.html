@@ -17,6 +17,8 @@
             --chat-user-bg: rgba(209, 168, 92, 0.12);
             --chat-bot-bg: rgba(255, 255, 255, 0.02);
             --sidebar-bg: rgba(10, 15, 30, 0.7);
+            --error-color: #ef4444;
+            --success-color: #10b981;
         }
 
         [data-theme="light"] {
@@ -49,7 +51,96 @@
             overflow: hidden;
         }
 
-        /* Sidebar Navigation Layout */
+        /* ================= MODAL STYLES ================= */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .modal-content p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-primary {
+            background: var(--accent);
+            color: #02040a;
+        }
+
+        .modal-btn-primary:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+        }
+
+        .modal-btn-secondary:hover {
+            background: var(--glass-bg);
+            border-color: var(--accent);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ================= SIDEBAR ================= */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -60,6 +151,7 @@
             flex-direction: column;
             padding: 24px 16px;
             z-index: 10;
+            overflow: hidden;
         }
 
         .sidebar-header {
@@ -107,13 +199,14 @@
             border-color: var(--glass-border);
         }
 
-        /* Main App Workspace Architecture */
+        /* ================= MAIN WORKSPACE ================= */
         .main-workspace {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             height: 100%;
+            min-width: 0;
         }
 
         .top-bar {
@@ -137,6 +230,8 @@
 
         .brand-title img {
             display: block;
+            width: 28px;
+            height: 28px;
         }
 
         .brand-title span {
@@ -152,6 +247,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .ui-btn {
@@ -167,6 +263,8 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
         .ui-btn:hover {
@@ -175,7 +273,7 @@
             color: var(--text-main);
         }
 
-        /* Chat Streams Container */
+        /* ================= CHAT AREA ================= */
         .chat-viewports {
             flex: 1;
             overflow-y: auto;
@@ -217,7 +315,7 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* Input Deck Frame Area */
+        /* ================= INPUT AREA ================= */
         .input-dock {
             padding: 20px 60px 10px 60px;
             display: flex;
@@ -232,8 +330,10 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             padding: 8px;
+            gap: 8px;
+            position: relative;
         }
 
         .input-wrapper:focus-within {
@@ -241,7 +341,15 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .input-wrapper input {
+        .textarea-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 44px;
+        }
+
+        .input-wrapper textarea {
             flex: 1;
             background: transparent;
             border: none;
@@ -249,6 +357,34 @@
             color: var(--text-main);
             padding: 12px 16px;
             font-size: 15px;
+            font-family: inherit;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .input-wrapper textarea::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .input-wrapper textarea::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 2px;
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .char-counter.warning {
+            color: var(--error-color);
         }
 
         .send-action-btn {
@@ -260,9 +396,22 @@
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            height: 44px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        /* Footer Utilities / Support & Disclaimer System */
+        .send-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ================= FOOTER ================= */
         .workspace-footer {
             display: flex;
             justify-content: space-between;
@@ -270,6 +419,8 @@
             padding: 0 4px 12px 4px;
             font-size: 12px;
             color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .support-channels {
@@ -296,15 +447,217 @@
             letter-spacing: 0.2px;
         }
 
+        /* ================= ANIMATIONS ================= */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= RESPONSIVE DESIGN ================= */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+                padding: 16px 12px;
+            }
+
+            .top-bar {
+                padding: 0 24px;
+            }
+
+            .chat-viewports {
+                padding: 24px 32px;
+            }
+
+            .input-dock {
+                padding: 16px 32px 8px 32px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 120px;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+                flex-direction: row;
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .sidebar-header {
+                display: none;
+            }
+
+            .local-history-container {
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 8px;
+                flex: 1;
+            }
+
+            .history-item {
+                min-width: 120px;
+                white-space: normal;
+            }
+
+            .main-workspace {
+                height: 100%;
+            }
+
+            .top-bar {
+                height: 60px;
+                padding: 0 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .brand-title {
+                font-size: 16px;
+            }
+
+            .brand-title img {
+                width: 24px;
+                height: 24px;
+            }
+
+            .controls-group {
+                gap: 8px;
+            }
+
+            .ui-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .chat-viewports {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .message {
+                max-width: 95%;
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            .input-dock {
+                padding: 12px 16px 8px 16px;
+            }
+
+            .input-wrapper {
+                padding: 6px;
+                border-radius: 10px;
+            }
+
+            .input-wrapper textarea {
+                padding: 10px 12px;
+                font-size: 14px;
+                min-height: 40px;
+                max-height: 100px;
+            }
+
+            .send-action-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+                height: 40px;
+            }
+
+            .char-counter {
+                bottom: 6px;
+                right: 12px;
+                font-size: 11px;
+            }
+
+            .workspace-footer {
+                padding: 0 4px 8px 4px;
+                font-size: 11px;
+            }
+
+            .modal-content {
+                padding: 24px;
+                max-width: 90%;
+            }
+
+            .modal-content h2 {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                max-height: 100px;
+            }
+
+            .top-bar {
+                height: auto;
+                min-height: 50px;
+                padding: 12px;
+            }
+
+            .brand-title {
+                font-size: 14px;
+            }
+
+            .controls-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .chat-viewports {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .message {
+                max-width: 100%;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .input-dock {
+                padding: 10px 12px 6px 12px;
+            }
+
+            .input-wrapper textarea {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .send-action-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                height: 36px;
+            }
         }
     </style>
 </head>
 <body>
 
-  <div class="sidebar">       
+    <!-- Email Verification Modal -->
+    <div class="modal-overlay" id="emailVerificationModal">
+        <div class="modal-content">
+            <h2>📧 Verify Your Email</h2>
+            <p>We've sent a verification link to your email. Please check your inbox and click the link to verify your account.</p>
+            <p><strong>Don't see it?</strong> Check your spam folder or request a new verification email.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="closeEmailVerificationModal()">Got It</button>
+                <button class="modal-btn modal-btn-primary" onclick="resendVerificationEmail()">Resend Email</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Sidebar -->
+    <div class="sidebar">       
         <div class="sidebar-header">Local Workspaces</div>
         
         <button class="ui-btn" id="newChatBtn" style="justify-content: center; margin-bottom: 16px; font-weight: 600; border-color: var(--accent);">
@@ -317,10 +670,12 @@
         </button>
     </div>
     
+    <!-- Main Workspace -->
     <div class="main-workspace">
+        <!-- Top Bar -->
         <div class="top-bar">
             <div class="brand-title">
-                <img src="logo.jpeg" alt="Zytherion Logo" style="width: 28px; height: 28px;">
+                <img src="logo.jpeg" alt="Zytherion Logo">
                 <span>Zytherion <em>AI</em></span>
             </div>
             <div class="controls-group">
@@ -333,14 +688,25 @@
             </div>
         </div>
 
+        <!-- Chat Container -->
         <div class="chat-viewports" id="chat-container"></div>
 
+        <!-- Input Area -->
         <div class="input-dock">
             <div class="input-wrapper">
-                <input type="text" id="user-input" placeholder="Ask Zytherion AI..." autocomplete="off">
+                <div class="textarea-container">
+                    <textarea 
+                        id="user-input" 
+                        placeholder="Ask Zytherion AI..." 
+                        autocomplete="off"
+                        rows="1"
+                    ></textarea>
+                    <span class="char-counter" id="char-count">0/5000</span>
+                </div>
                 <button class="send-action-btn" id="send-btn">Send</button>
             </div>
             
+            <!-- Footer -->
             <div class="workspace-footer">
                 <div class="support-channels">
                     <a href="mailto:zytherionai@gmail.com" class="support-icon-link" title="Email Support">
@@ -356,7 +722,7 @@
     </div>
 
     <script>
-        // Core Visual State Management (Theme Execution)
+        // ================= THEME TOGGLE ================= 
         const themeToggleBtn = document.getElementById("themeToggleBtn");
         const savedTheme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
@@ -368,10 +734,40 @@
             localStorage.setItem("theme", newTheme);
         });
 
-        // Authentication Eviction Routing
+        // ================= LOGOUT ================= 
         document.getElementById("logoutBtn").addEventListener("click", () => {
             localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
             window.location.href = "login.html";
+        });
+
+        // ================= EMAIL VERIFICATION MODAL ================= 
+        function showEmailVerificationModal() {
+            const modal = document.getElementById("emailVerificationModal");
+            modal.classList.add("active");
+        }
+
+        function closeEmailVerificationModal() {
+            const modal = document.getElementById("emailVerificationModal");
+            modal.classList.remove("active");
+        }
+
+        function resendVerificationEmail() {
+            alert("Please check your email for the verification link. This feature will be implemented with Resend integration.");
+            closeEmailVerificationModal();
+        }
+
+        // Check if user just registered
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("emailVerification") === "true") {
+            showEmailVerificationModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById("emailVerificationModal").addEventListener("click", (e) => {
+            if (e.target.id === "emailVerificationModal") {
+                closeEmailVerificationModal();
+            }
         });
     </script>
     <script src="script.js"></script>

@@ -6,23 +6,98 @@ const cors = require("cors");
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const { body, validationResult } = require("express-validator");
+const emailValidator = require("email-validator");
 
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
-app.use(cors()); 
+// Security headers
+app.use(helmet());
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === "production" 
+    ? "https://zytherion-topaz.vercel.app" 
+    : "http://localhost:3000",
+  credentials: true
+}));
+
 app.use(express.json()); 
+
+/* ================= RATE LIMITING ================= */
+// Login attempt limiter - 5 attempts per 15 minutes
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Maximum 5 attempts
+  message: "Too many login attempts. Please try again after 15 minutes.",
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Registration limiter - 3 per hour per IP
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // Maximum 3 registrations
+  message: "Too many accounts created from this IP. Try again later.",
+  skip: (req) => process.env.NODE_ENV !== "production"
+});
+
+// Chat message limiter - 30 messages per minute
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30,
+  message: "Too many messages. Please slow down.",
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 /* ================= DATABASE CONNECTION ================= */
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch((err) => console.error("MongoDB Connection Error:", err));
+  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
 /* ================= SCHEMAS & MODELS ================= */
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: { 
+    type: String, 
+    required: true 
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String,
+    default: null
+  },
+  verificationTokenExpiry: {
+    type: Date,
+    default: null
+  },
+  refreshToken: {
+    type: String,
+    default: null
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  lastLogin: {
+    type: Date,
+    default: null
+  }
 });
+
 const User = mongoose.model("User", userSchema);
 
 const conversationSchema = new mongoose.Schema({
@@ -43,17 +118,66 @@ function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied. Missing Token." });
+    return res.status(401).json({ message: "❌ Access denied. Missing Token." });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid token structure." });
+      return res.status(403).json({ message: "❌ Invalid or expired token." });
     }
     req.user = user;
     next();
   });
 }
+
+/* ================= VALIDATION MIDDLEWARE ================= */
+const validateRegister = [
+  body("email")
+    .trim()
+    .toLowerCase()
+    .custom(value => {
+      if (!emailValidator.validate(value)) {
+        throw new Error("Invalid email format");
+      }
+      return true;
+    }),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .matches(/[A-Z]/)
+    .withMessage("Password must contain at least one uppercase letter")
+    .matches(/[0-9]/)
+    .withMessage("Password must contain at least one number")
+    .matches(/[!@#$%^&*]/)
+    .withMessage("Password must contain at least one special character (!@#$%^&*)")
+];
+
+const validateLogin = [
+  body("email")
+    .trim()
+    .toLowerCase()
+    .custom(value => {
+      if (!emailValidator.validate(value)) {
+        throw new Error("Invalid email format");
+      }
+      return true;
+    }),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+];
+
+// Validation error handler
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      message: "Validation failed",
+      errors: errors.array().map(err => err.msg)
+    });
+  }
+  next();
+};
 
 /* ================= HELPER FUNCTIONS ================= */
 function generateSystemPrompt() {
@@ -73,55 +197,226 @@ CRITICAL CONTEXT & KNOWLEDGE OVERRIDE:
 - If a user asks you about your knowledge cutoff, limitations, or timeline, proudly explain that while your base training ended in 2023, you are equipped with live search matrices that allow you to browse the live web and pull current information in real-time as of ${now.getFullYear()}.`;
 }
 
+// Generate access token (short-lived: 1 hour)
+function generateAccessToken(userId, email) {
+  return jwt.sign(
+    { id: userId, email: email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+}
+
+// Generate refresh token (long-lived: 7 days)
+function generateRefreshToken(userId) {
+  return jwt.sign(
+    { id: userId },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "7d" }
+  );
+}
+
 /* ================= AUTH ROUTES ================= */
-app.post("/api/auth/register", async (req, res) => {
+
+// REGISTER ROUTE
+app.post("/api/auth/register", registerLimiter, validateRegister, handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: "Email and password required" });
     
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      return res.status(409).json({ message: "❌ Email already registered. Please login or use a different email." });
+    }
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
+    // Hash password with 12 salt rounds
+    const SALT_ROUNDS = 12;
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    
+    // Generate verification token
+    const verificationToken = jwt.sign(
+      { email: email },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+    
+    // Create new user
+    const newUser = new User({ 
+      email, 
+      password: hashedPassword,
+      verificationToken: verificationToken,
+      verificationTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    });
+    
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+    
+    // TODO: Send verification email using Resend (Step 3)
+    console.log(`📧 Verification email would be sent to: ${email}`);
+    console.log(`🔗 Verification link: https://your-frontend.com/verify?token=${verificationToken}`);
+    
+    res.status(201).json({ 
+      message: "✅ Registration successful! Check your email to verify your account.",
+      requiresEmailVerification: true
+    });
+    
   } catch (error) {
-    res.status(500).json({ message: "Registration error", error: error.message });
+    console.error("Registration Error:", error.message);
+    res.status(500).json({ message: "❌ Registration failed. Please try again." });
   }
 });
 
-app.post("/api/auth/login", async (req, res) => {
+// VERIFY EMAIL ROUTE
+app.get("/api/auth/verify/:token", async (req, res) => {
+  try {
+    const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
+    
+    const user = await User.findOne({ email: decoded.email });
+    if (!user) {
+      return res.status(404).json({ message: "❌ User not found" });
+    }
+    
+    if (user.verified) {
+      return res.status(400).json({ message: "⚠️ Email already verified" });
+    }
+    
+    // Mark user as verified
+    await User.updateOne(
+      { email: decoded.email },
+      { 
+        verified: true,
+        verificationToken: null,
+        verificationTokenExpiry: null
+      }
+    );
+    
+    res.json({ 
+      message: "✅ Email verified successfully! You can now login.",
+      redirectUrl: "/login.html"
+    });
+    
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: "❌ Verification link expired. Please register again." });
+    }
+    res.status(400).json({ message: "❌ Invalid verification token" });
+  }
+});
+
+// LOGIN ROUTE
+app.post("/api/auth/login", loginLimiter, validateLogin, handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Find user
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) {
+      return res.status(401).json({ message: "❌ Invalid email or password" });
+    }
     
+    // Check if email is verified
+    if (!user.verified) {
+      return res.status(403).json({ 
+        message: "❌ Email not verified. Check your email for verification link.",
+        requiresEmailVerification: true
+      });
+    }
+    
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "❌ Invalid email or password" });
+    }
     
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token });
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id, user.email);
+    const refreshToken = generateRefreshToken(user._id);
+    
+    // Save refresh token to database
+    await User.updateOne(
+      { _id: user._id },
+      { 
+        refreshToken: refreshToken,
+        lastLogin: new Date()
+      }
+    );
+    
+    res.json({ 
+      message: "✅ Login successful!",
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      expiresIn: 3600, // 1 hour in seconds
+      user: {
+        id: user._id,
+        email: user.email
+      }
+    });
+    
   } catch (error) {
-    res.status(500).json({ message: "Login error" });
+    console.error("Login Error:", error.message);
+    res.status(500).json({ message: "❌ Login failed. Please try again." });
+  }
+});
+
+// REFRESH TOKEN ROUTE
+app.post("/api/auth/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(401).json({ message: "❌ Refresh token required" });
+    }
+    
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    
+    // Find user and verify refresh token matches
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(401).json({ message: "❌ Invalid refresh token" });
+    }
+    
+    // Generate new access token
+    const newAccessToken = generateAccessToken(user._id, user.email);
+    
+    res.json({ 
+      message: "✅ Token refreshed",
+      accessToken: newAccessToken,
+      expiresIn: 3600
+    });
+    
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: "❌ Refresh token expired. Please login again." });
+    }
+    res.status(401).json({ message: "❌ Invalid refresh token" });
   }
 });
 
 /* ================= CHAT ROUTE ================= */
-app.post("/chat", authenticateToken, async (req, res) => {
+app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.user.id;
 
-    if (!message) {
-      return res.status(400).json({ reply: "Message required." });
+    // Validate message
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ message: "❌ Valid message required" });
     }
 
+    if (message.trim().length === 0) {
+      return res.status(400).json({ message: "❌ Message cannot be empty" });
+    }
+
+    if (message.length > 5000) {
+      return res.status(400).json({ message: "❌ Message too long (max 5000 characters)" });
+    }
+
+    // Find or create conversation
     let conversation = await Conversation.findOne({ userId });
     if (!conversation) {
       conversation = new Conversation({ userId, messages: [] });
     }
 
+    // Add user message to conversation
     conversation.messages.push({ role: "user", content: message });
     const recentMessages = conversation.messages.slice(-10);
 
@@ -145,10 +440,10 @@ app.post("/chat", authenticateToken, async (req, res) => {
             searchResults = tavilyResponse.data.results
               .map(r => `Title: ${r.title}\nContent: ${r.content}\nSource: ${r.url}`)
               .join("\n\n");
-            console.log("Context parsed successfully via Tavily Engine.");
+            console.log("✅ Context parsed successfully via Tavily Engine.");
           }
         } catch (tavilyErr) {
-          console.warn("Tavily lookup bypassed or credit exhausted. Diverting to backup engine...");
+          console.warn("⚠️ Tavily lookup bypassed. Diverting to backup engine...");
         }
       }
 
@@ -165,10 +460,10 @@ app.post("/chat", authenticateToken, async (req, res) => {
           const results = serperResponse.data?.organic?.slice(0, 3);
           if (results?.length) {
             searchResults = results.map(r => `Title: ${r.title}\nSnippet: ${r.snippet}\nSource: ${r.link}`).join("\n\n");
-            console.log("Context parsed successfully via Serper Engine.");
+            console.log("✅ Context parsed successfully via Serper Engine.");
           }
         } catch (serperErr) {
-          console.error("All fallback search engines unavailable.");
+          console.warn("⚠️ Serper lookup unavailable.");
         }
       }
     }
@@ -192,6 +487,7 @@ ${searchResults}
 USER_QUESTION: ${message}`;
     }
 
+    // Call OpenRouter API
     const aiResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -206,14 +502,19 @@ USER_QUESTION: ${message}`;
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://zytherionai-topaz.vercel.app", 
+          "HTTP-Referer": "https://zytherion-topaz.vercel.app", 
           "X-Title": "Zytherion"
         }
       }
     );
 
-    const reply = aiResponse.data?.choices?.[0]?.message?.content || "No response from AI.";
+    // Validate AI response
+    const reply = aiResponse.data?.choices?.[0]?.message?.content;
+    if (!reply) {
+      return res.status(500).json({ message: "❌ No response from AI engine. Try again." });
+    }
 
+    // Save conversation
     conversation.messages.push({ role: "assistant", content: reply });
     await conversation.save();
 
@@ -224,18 +525,47 @@ USER_QUESTION: ${message}`;
     });
 
   } catch (error) {
-    console.error("FULL CHAT ROUTE ERROR:", error.message);
-    res.status(500).json({ error: error.message });
+    console.error("❌ CHAT ROUTE ERROR:", error.message);
+    
+    // Specific error messages
+    if (error.response?.status === 401) {
+      return res.status(401).json({ message: "❌ AI API authentication failed. Check your API keys." });
+    }
+    if (error.response?.status === 429) {
+      return res.status(429).json({ message: "❌ AI API rate limited. Try again in a moment." });
+    }
+    
+    res.status(500).json({ 
+      message: "❌ Failed to process message. Please try again.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 });
 
-/* ================= HEALTH LAYER ================= */
+/* ================= HEALTH CHECK ================= */
 app.get("/", (req, res) => {
-  res.send("Zytherion Backend Running Securely");
+  res.json({ 
+    status: "✅ Zytherion Backend Running Securely",
+    timestamp: new Date().toISOString()
+  });
+});
+
+/* ================= ERROR HANDLING ================= */
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  res.status(500).json({ 
+    message: "❌ Internal server error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ message: "❌ Route not found" });
 });
 
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running smoothly on port ${PORT}`);
+  console.log(`✅ Zytherion Server running securely on port ${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
