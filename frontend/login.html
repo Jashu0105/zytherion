@@ -3,72 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zytherion AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Zytherion AI - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* ==========================================================================
-           ZYTHERION CYBERPUNK SLIDE PANEL DESIGN SYSTEM
-           ========================================================================== */
         :root {
-            --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
-            --glass-bg: rgba(15, 23, 42, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --text-main: #f8fafc;
+            --bg-dark: #080c14;
+            --card-glass: rgba(13, 22, 38, 0.7);
+            --border-glow: rgba(255, 255, 255, 0.05);
+            --border-focus: rgba(197, 160, 89, 0.4);
+            --brand-primary: linear-gradient(135deg, #dfc07d 0%, #6366f1 50%, #9063f1 100%);
+            --user-gradient: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+            --bot-gradient: rgba(17, 27, 47, 0.85);
+            --text-pure: #ffffff;
+            --text-smooth: #f1f5f9;
             --text-muted: #64748b;
-            --accent: #d1a85c;
-            --accent-glow: rgba(209, 168, 92, 0.15);
-            --input-bg: rgba(4, 6, 10, 0.6);
-            --panel-slide-bg: linear-gradient(135deg, #0a1128 0%, #02040a 100%);
-            
-            --toggle-text-pure: #ffffff;
-            --toggle-text-muted: #94a3b8;
-            --toggle-btn-border: #d1a85c;
-            --toggle-btn-text: #d1a85c;
-            --toggle-btn-hover-bg: #d1a85c;
-            --toggle-btn-hover-text: #02040a;
-        }
-
-        /* AUDITED: Replaced burning white with premium matte platinum and slate gray */
-        [data-theme="light"] {
-            --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); /* Soft metallic grey instead of pure white */
-            --glass-bg: rgba(255, 255, 255, 0.4); 
-            --glass-border: rgba(15, 23, 42, 0.1);
-            --text-main: #0f172a; /* Deep charcoal black text */
-            --text-muted: #475569;
-            --accent: #a37f3d; /* Deeper gold to stand out on light background */
-            --accent-glow: rgba(163, 127, 61, 0.15);
-            --input-bg: rgba(255, 255, 255, 0.6);
-            --panel-slide-bg: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); /* Muted industrial steel panels */
-            
-            /* High-contrast pure black text for maximum legibility */
-            --toggle-text-pure: #000000;
-            --toggle-text-muted: #0f172a;
-            --toggle-btn-border: #000000;
-            --toggle-btn-text: #000000;
-            --toggle-btn-hover-bg: #000000;
-            --toggle-btn-hover-text: #ffffff;
+            --text-gold: #c5a059;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            text-decoration: none;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
+            background: var(--bg-dark);
+            color: var(--text-smooth);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            color: var(--text-main);
+            height: 100vh;
             overflow: hidden;
             position: relative;
-            transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
         }
 
         body::before {
@@ -76,606 +44,437 @@
             position: absolute;
             inset: 0;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(209, 168, 92, 0.03) 0%, transparent 35%),
-                radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
-            pointer-events: none;
+                radial-gradient(circle at 15% 15%, rgba(197, 160, 89, 0.05) 0%, transparent 35%),
+                radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(8, 12, 20, 1) 0%, transparent 100%);
             z-index: 0;
         }
 
-        .top-bar {
+        body::after {
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            padding: 0 40px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 12px;
-            z-index: 100;
-            pointer-events: auto;
-        }
-
-        .ui-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            user-select: none;
-        }
-
-        .ui-btn:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 12px var(--accent-glow);
-            transform: translateY(-1px);
-        }
-
-        @keyframes masterPulse {
-            0%, 100% { box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 15px rgba(209, 168, 92, 0.05); }
-            50% { box-shadow: 0 35px 65px -10px rgba(0, 0, 0, 0.9), 0 0 25px rgba(209, 168, 92, 0.2); }
-        }
-
-        .container {
-            position: relative;
-            width: 850px;
-            height: 620px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            overflow: hidden;
-            animation: masterPulse 6s infinite ease-in-out;
-            z-index: 10;
-        }
-
-        .form-box {
-            position: absolute;
-            right: 0;
-            width: 50%;
-            height: 100%;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            z-index: 1;
-            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, visibility 0s 0.6s;
-        }
-
-        .container.active .form-box.login {
-            transform: translateX(-100%);
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .form-box.register {
-            transform: translateX(100%);
-            opacity: 0;
-            visibility: hidden;
-            left: 0;
-        }
-
-        .container.active .form-box.register {
-            transform: translateX(0);
-            opacity: 1;
-            visibility: visible;
-            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, visibility 0s 0s;
-        }
-
-        form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo-wrapper {
-            width: 64px;
-            height: 64px;
-            background: #ffffff;
-            border-radius: 14px;
-            margin-bottom: 16px;
-            align-self: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 1px solid var(--accent);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .brand-logo {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            mix-blend-mode: multiply;
-        }
-
-        form h1 {
-            font-size: 26px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .form-subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .input-box {
-            position: relative;
-            width: 100%;
-            margin-bottom: 14px;
-        }
-
-        .input-box input {
-            width: 100%;
-            padding: 14px 75px 14px 18px;
-            background: var(--input-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            outline: none;
-            font-size: 15px;
-            color: var(--text-main);
-            transition: all 0.2s ease;
-        }
-
-        .input-box input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 12px var(--accent-glow);
-            background: rgba(15, 23, 42, 0.1);
-        }
-
-        .input-box i.input-icon {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            color: var(--text-muted);
-            transition: color 0.2s;
+            inset: 0;
+            background: radial-gradient(circle at 50% 10%, rgba(197, 160, 89, 0.02) 0%, transparent 50%);
+            animation: gentlePulse 8s infinite ease-in-out;
+            z-index: 0;
             pointer-events: none;
         }
 
-        .toggle-password-view {
-            position: absolute;
-            right: 44px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: color 0.2s;
+        @keyframes gentlePulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 440px;
+            padding: 24px;
             z-index: 10;
         }
 
-        .toggle-password-view:hover {
-            color: var(--text-main);
+        .auth-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 45px 35px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            position: relative;
         }
 
-        .input-box input:focus ~ i.input-icon {
-            color: var(--accent);
+        .auth-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 20%;
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.3), transparent);
         }
 
-        .forgot-link {
-            text-align: right;
-            margin: -4px 0 14px;
+        .auth-card h2 {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #c5a059 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .forgot-link a {
+        .auth-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        .error-alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 13px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .error-alert.show {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-gold);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 15px 18px;
+            background: rgba(4, 6, 10, 0.5);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            color: var(--text-pure);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .auth-input:focus {
+            border-color: var(--text-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+        }
+
+        .auth-input::placeholder {
             color: var(--text-muted);
         }
 
-        .forgot-link a:hover {
-            color: var(--accent);
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #c5a059 0%, #9a7836 100%);
+            color: var(--text-pure);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px -6px rgba(197, 160, 89, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -6px rgba(197, 160, 89, 0.45);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .social-divider {
+            margin: 24px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-glow);
+        }
+
+        .social-login {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glow);
+            background: rgba(4, 6, 10, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-gold);
+            transform: translateY(-2px);
+        }
+
+        .social-btn:active {
+            transform: translateY(0);
+        }
+
+        .auth-footer {
+            margin-top: 28px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--text-gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
             text-decoration: underline;
         }
 
-        .btn {
-            width: 100%;
-            height: 48px;
-            background: var(--accent);
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            color: #02040a;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-
-        .btn:hover {
-            opacity: 0.95;
-            box-shadow: 0 6px 20px rgba(209, 168, 92, 0.3);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        form p {
-            font-size: 12px;
-            color: var(--text-muted);
+        .signup-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-glow);
             text-align: center;
-            margin: 14px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .social-icons a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--glass-border);
-            background: var(--input-bg);
-            border-radius: 8px;
-            font-size: 20px;
-            color: var(--text-main);
-            transition: all 0.2s;
-        }
-
-        .social-icons a:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        /* ==========================================================================
-           THE SPLIT GRAPHICS SLIDING TOGGLE LAYER
-           ========================================================================== */
-        .toggle-box {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .toggle-box::before {
-            content: '';
-            position: absolute;
-            left: -250%;
-            width: 300%;
-            height: 100%;
-            background: var(--panel-slide-bg);
-            border-right: 1px solid var(--glass-border);
-            border-left: 1px solid var(--glass-border);
-            border-radius: 150px;
-            z-index: 2;
-            pointer-events: all;
-            transition: left 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-        }
-
-        .container.active .toggle-box::before {
-            left: 50%;
-        }
-
-        .toggle-panel {
-            position: absolute;
-            width: 50%;
-            height: 100%;
-            color: var(--toggle-text-pure);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 0 40px;
-            text-align: center;
-            z-index: 2;
-            pointer-events: all;
-            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), color 0.3s ease;
-        }
-
-        .toggle-panel h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .toggle-panel p {
-            font-size: 14px;
-            color: var(--toggle-text-muted);
-            margin-bottom: 24px;
-            line-height: 1.5;
-            transition: color 0.3s ease;
-        }
-
-        .toggle-panel .btn {
-            width: 180px;
-            height: 46px;
-            background: transparent;
-            border: 2px solid var(--toggle-btn-border);
-            color: var(--toggle-btn-text);
-            box-shadow: none;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-panel .btn:hover {
-            background: var(--toggle-btn-hover-bg);
-            color: var(--toggle-btn-hover-text);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .toggle-panel.toggle-left {
-            left: 0;
-            transform: translateX(0);
-            transition-delay: 0.6s;
-        }
-
-        .container.active .toggle-panel.toggle-left {
-            transform: translateX(-100%);
-            transition-delay: 0s;
-        }
-
-        .toggle-panel.toggle-right {
-            right: 0;
-            transform: translateX(100%);
-            transition-delay: 0s;
-        }
-
-        .container.active .toggle-panel.toggle-right {
-            transform: translateX(0);
-            transition-delay: 0.6s;
-        }
-
-        .msg-alert {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            padding: 12px;
-            border-radius: 8px;
+        .signup-section p {
             font-size: 13px;
-            display: none;
-            text-align: center;
-            z-index: 150;
-            backdrop-filter: blur(10px);
+            color: var(--text-muted);
+            margin-bottom: 12px;
         }
 
-        .msg-alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid #f87171; color: #f87171; }
-        .msg-alert.success { background: rgba(16, 185, 129, 0.15); border: 1px solid #34d399; color: #34d399; }
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-pure);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-        @media screen and (max-width: 880px) {
-            .container { width: 95%; height: auto; min-height: 580px; }
+        .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-gold);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+
+            .auth-card h2 {
+                font-size: 24px;
+            }
+
+            .auth-btn {
+                font-size: 14px;
+                padding: 14px;
+            }
+
+            .social-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <button class="ui-btn" onclick="window.location.href='mailto:zytherionai@gmail.com?subject=Mainframe%20Feedback'">Feedback</button>
-        <button class="ui-btn" id="themeToggleBtn">🌓 Theme</button>
-    </div>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Login</h2>
+        <p class="auth-subtitle">LOG IN TO YOUR ACCOUNT</p>
 
-    <div class="msg-alert" id="statusBox"></div>
+        <div id="errorAlert" class="error-alert"></div>
 
-    <div class="container">
-        
-        <!-- LOGIN PANEL -->
-        <div class="form-box login">
-            <form id="loginForm" onsubmit="executeAuth(event, 'login')">
-                <div class="logo-wrapper">
-                    <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
-                </div>
-                <h1>Login</h1>
-                <p class="form-subtitle">Log in to your account</p>
-                
-                <div class="input-box">
-                    <input type="email" id="loginEmail" placeholder="Email Address" required autocomplete="email">
-                    <i class='bx bxs-envelope input-icon'></i>
-                </div>
-                
-                <div class="input-box">
-                    <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
-                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('loginPassword', this)"></i>
-                    <i class='bx bxs-lock-alt input-icon'></i>
-                </div>
-                
-                <div class="forgot-link">
-                    <a href="#">Forgot password?</a>
-                </div>
-                <button type="submit" class="btn">Login</button>
-                <p>or login with social platforms</p>
-                <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google'></i></a>
-                    <a href="#"><i class='bx bxl-github'></i></a>
-                    <a href="#"><i class='bx bxl-linkedin'></i></a>
-                </div>
-            </form>
-        </div>
-
-        <!-- REGISTRATION PANEL -->
-        <div class="form-box register">
-            <form id="registerForm" onsubmit="executeAuth(event, 'register')">
-                <div class="logo-wrapper">
-                    <img class="brand-logo" src="logo.jpeg" alt="Zytherion Logo">
-                </div>
-                <h1>Create New Profile</h1>
-                <p class="form-subtitle">Create your account in the Zytherion AI ecosystem</p>
-                
-                <div class="input-box">
-                    <input type="text" id="regUser" placeholder="User Name" required autocomplete="name">
-                    <i class='bx bxs-user input-icon'></i>
-                </div>
-                
-                <div class="input-box">
-                    <input type="email" id="regEmail" placeholder="Email Address" required autocomplete="email">
-                    <i class='bx bxs-envelope input-icon'></i>
-                </div>
-                
-                <div class="input-box">
-                    <input type="password" id="regPassword" placeholder="Password" required autocomplete="new-password">
-                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('regPassword', this)"></i>
-                    <i class='bx bxs-lock-alt input-icon'></i>
-                </div>
-                
-                <div class="input-box">
-                    <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required autocomplete="new-password">
-                    <i class='bx bx-hide toggle-password-view' onclick="togglePasswordMask('regConfirmPassword', this)"></i>
-                    <i class='bx bxs-lock-alt input-icon'></i>
-                </div>
-                
-                <button type="submit" class="btn" style="margin-top: 6px;">Create New Account</button>
-                <p>or register with social platforms</p>
-                <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google'></i></a>
-                    <a href="#"><i class='bx bxl-github'></i></a>
-                    <a href="#"><i class='bx bxl-linkedin'></i></a>
-                </div>
-            </form>
-        </div>
-
-        <!-- AMBIENT SLIDING PANELS -->
-        <div class="toggle-box">
-            <div class="toggle-panel toggle-left">
-                <h1>Hello, User!</h1>
-                <p>If you have not registered into the Zytherion AI, Create an new account right now.</p>
-                <button class="btn register-btn">Create New Account</button>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="auth-input" 
+                    placeholder="Enter your email"
+                    required
+                    autocomplete="email"
+                >
             </div>
 
-            <div class="toggle-panel toggle-right">
-                <h1>Welcome Back!</h1>
-                <p>If you already have an account, return to login panel.</p>
-                <button class="btn login-btn">Tap to Login</button>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="auth-input" 
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                >
             </div>
+
+            <button type="submit" class="auth-btn" id="loginBtn">
+                <span>Login</span>
+            </button>
+        </form>
+
+        <!-- Social Login Section -->
+        <div class="social-divider">OR LOGIN WITH SOCIAL PLATFORMS</div>
+        <div class="social-login">
+            <button type="button" class="social-btn" title="Login with Google" onclick="alert('🔜 Coming Soon! Google OAuth integration (Phase 7)')">
+                🔵
+            </button>
+            <button type="button" class="social-btn" title="Login with GitHub" onclick="alert('🔜 Coming Soon! GitHub OAuth integration (Phase 7)')">
+                ⚫
+            </button>
+            <button type="button" class="social-btn" title="Login with LinkedIn" onclick="alert('🔜 Coming Soon! LinkedIn OAuth integration (Phase 7)')">
+                🔷
+            </button>
+        </div>
+
+        <div class="auth-footer">
+            <a href="#" onclick="alert('🔜 Coming Soon! Password reset (Phase 6)'); return false;">Forgot password?</a>
+        </div>
+
+        <div class="signup-section">
+            <p>Don't have an account?</p>
+            <button type="button" class="signup-btn" onclick="goToSignup()">Create New Account</button>
         </div>
     </div>
+</div>
 
-    <script>
-        const container = document.querySelector('.container');
-        const registerBtn = document.querySelector('.register-btn');
-        const loginBtn = document.querySelector('.login-btn');
-        const statusBox = document.getElementById("statusBox");
-        const themeToggleBtn = document.getElementById("themeToggleBtn");
+<script>
+    // BACKEND URL
+    const BACKEND_URL = "https://aegisai-backend-ifvc.onrender.com";
 
-        registerBtn.addEventListener('click', () => { container.classList.add('active'); });
-        loginBtn.addEventListener('click', () => { container.classList.remove('active'); });
+    function showError(message) {
+        const alert = document.getElementById("errorAlert");
+        alert.textContent = "❌ " + message;
+        alert.classList.add("show");
+        setTimeout(() => alert.classList.remove("show"), 5000);
+    }
 
-        const savedTheme = localStorage.getItem("theme") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
+    function setButtonLoading(loading) {
+        const btn = document.getElementById("loginBtn");
+        const span = btn.querySelector("span");
+        if (loading) {
+            btn.disabled = true;
+            span.innerHTML = '<span class="spinner"></span> Logging in...';
+        } else {
+            btn.disabled = false;
+            span.textContent = "Login";
+        }
+    }
 
-        themeToggleBtn.addEventListener("click", () => {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-        });
+    async function handleLogin(event) {
+        event.preventDefault();
 
-        function togglePasswordMask(inputTargetId, dynamicIcon) {
-            const targetInput = document.getElementById(inputTargetId);
-            if (targetInput.type === "password") {
-                targetInput.type = "text";
-                dynamicIcon.classList.remove("bx-hide");
-                dynamicIcon.classList.add("bx-show");
-                dynamicIcon.style.color = "var(--accent)";
-            } else {
-                targetInput.type = "password";
-                dynamicIcon.classList.remove("bx-show");
-                dynamicIcon.classList.add("bx-hide");
-                dynamicIcon.style.color = "var(--text-muted)";
-            }
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+            showError("Please enter both email and password");
+            return;
         }
 
-        function printAlert(msg, level) {
-            statusBox.innerText = msg;
-            statusBox.className = `msg-alert ${level}`;
-            statusBox.style.display = "block";
-            if (level === "error") {
-                setTimeout(() => { statusBox.style.display = "none"; }, 4000);
+        setButtonLoading(true);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showError(data.message || "Login failed");
+                setButtonLoading(false);
+                return;
             }
-        }
 
-        async function executeAuth(event, type) {
-            event.preventDefault();
-            statusBox.style.display = "none";
-
-            const BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:3000"
-                : "https://aegisai-backend-ifvc.onrender.com";
-
-            if (type === "register") {
-                const username = document.getElementById("regUser").value.trim();
-                const email = document.getElementById("regEmail").value.trim();
-                const password = document.getElementById("regPassword").value;
-                const confirmPassword = document.getElementById("regConfirmPassword").value;
-
-                if (password !== confirmPassword) {
-                    printAlert("Validation Failed: Passwords do not match.", "error");
-                    return;
-                }
-
-                if (password.length < 8) {
-                    printAlert("Security Policy Failure: Cipher key must be at least 8 elements long.", "error");
-                    return;
-                }
-
-                try {
-                    const res = await fetch(`${BASE_URL}/api/auth/register`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username, email, password })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || "Registration trace rejected.");
-
-                    printAlert("Identity encrypted and verified! Sliding back to login panel layout...", "success");
-                    setTimeout(() => {
-                        document.getElementById("registerForm").reset();
-                        container.classList.remove('active');
-                    }, 2000);
-                } catch (err) {
-                    printAlert(`Registration Abort: ${err.message}`, "error");
-                }
-            } else {
-                const email = document.getElementById("loginEmail").value.trim();
-                const password = document.getElementById("loginPassword").value;
-
-                try {
-                    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email, password })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || "Invalid database authorization credentials match.");
-
-                    localStorage.setItem("token", data.token);
-                    printAlert("Cipher key unlocked! Synchronizing security nodes...", "success");
-                    window.location.href = "index.html";
-                } catch (err) {
-                    printAlert(`Mainframe Denied Access: ${err.message}`, "error");
-                }
+            localStorage.setItem("token", data.accessToken);
+            if (data.refreshToken) {
+                localStorage.setItem("refreshToken", data.refreshToken);
             }
+
+            window.location.href = "index.html";
+
+        } catch (error) {
+            showError("Connection error. Check your internet.");
+            setButtonLoading(false);
         }
-    </script>
+    }
+
+    function goToSignup() {
+        alert("To create an account, contact: zytherionai@gmail.com");
+    }
+
+    // Enter key support
+    document.getElementById("password").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            handleLogin(new Event('submit'));
+        }
+    });
+</script>
+
 </body>
 </html>
