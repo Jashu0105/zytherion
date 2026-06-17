@@ -390,6 +390,289 @@ app.post("/api/auth/refresh", async (req, res) => {
     res.status(401).json({ message: "❌ Invalid refresh token" });
   }
 });
+ /* ================= ADDITIONAL BACKEND ROUTES ================= */
+/* ADD THESE ROUTES TO YOUR server.js FILE */
+
+// ============================================================
+// USER PROFILE ROUTES
+// ============================================================
+
+// GET USER PROFILE DATA
+app.get("/api/user/profile", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    
+    if (!user) {
+      return res.status(404).json({ message: "❌ User not found" });
+    }
+
+    // Format last login
+    const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "Never";
+    const createdAt = new Date(user.createdAt).toLocaleString();
+
+    res.json({
+      message: "✅ Profile retrieved",
+      user: {
+        id: user._id,
+        email: user.email,
+        verified: user.verified,
+        createdAt: createdAt,
+        lastLogin: lastLogin,
+        accountAge: calculateAccountAge(user.createdAt)
+      }
+    });
+
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).json({ message: "❌ Failed to fetch profile" });
+  }
+});
+
+// CHANGE PASSWORD
+app.post("/api/user/change-password", authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "❌ All fields required" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "❌ New passwords do not match" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "❌ Password must be at least 8 characters" });
+    }
+
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      return res.status(400).json({ message: "❌ Password must contain uppercase letter and number" });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ message: "❌ New password must be different from current" });
+    }
+
+    // Find user
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "❌ User not found" });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "❌ Current password is incorrect" });
+    }
+
+    // Hash and update new password
+    const SALT_ROUNDS = 12;
+    const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    
+    await User.updateOne(
+      { _id: req.user.id },
+      { password: hashedNewPassword }
+    );
+
+    res.json({ message: "✅ Password changed successfully" });
+
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({ message: "❌ Failed to change password" });
+  }
+});
+
+// GET USER SETTINGS
+app.get("/api/user/settings", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Get or create default settings
+    let settings = await UserSettings.findOne({ userId });
+    
+    if (!settings) {
+      settings = new UserSettings({
+        userId: userId,
+        theme: "dark",
+        notifications: true,
+        autoDeleteChat: false,
+        autoDeleteAfterDays: 30,
+        language: "en",
+        enableExport: true
+      });
+      await settings.save();
+    }
+
+    res.json({
+      message: "✅ Settings retrieved",
+      settings: settings
+    });
+
+  } catch (error) {
+    console.error("Settings fetch error:", error);
+    res.status(500).json({ message: "❌ Failed to fetch settings" });
+  }
+});
+
+// UPDATE USER SETTINGS
+app.post("/api/user/settings", authenticateToken, async (req, res) => {
+  try {
+    const { theme, notifications, autoDeleteChat, autoDeleteAfterDays, language, enableExport } = req.body;
+    const userId = req.user.id;
+
+    // Validation
+    if (theme && !["dark", "light"].includes(theme)) {
+      return res.status(400).json({ message: "❌ Invalid theme" });
+    }
+
+    if (autoDeleteAfterDays && (autoDeleteAfterDays < 7 || autoDeleteAfterDays > 365)) {
+      return res.status(400).json({ message: "❌ Auto-delete days must be between 7 and 365" });
+    }
+
+    // Update settings
+    const settings = await UserSettings.findOneAndUpdate(
+      { userId: userId },
+      {
+        theme: theme || undefined,
+        notifications: notifications !== undefined ? notifications : undefined,
+        autoDeleteChat: autoDeleteChat !== undefined ? autoDeleteChat : undefined,
+        autoDeleteAfterDays: autoDeleteAfterDays || undefined,
+        language: language || undefined,
+        enableExport: enableExport !== undefined ? enableExport : undefined,
+        lastUpdated: new Date()
+      },
+      { new: true, upsert: true }
+    );
+
+    res.json({
+      message: "✅ Settings updated successfully",
+      settings: settings
+    });
+
+  } catch (error) {
+    console.error("Settings update error:", error);
+    res.status(500).json({ message: "❌ Failed to update settings" });
+  }
+});
+
+// DELETE ACCOUNT
+app.post("/api/user/delete-account", authenticateToken, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "❌ Password required to delete account" });
+    }
+
+    // Verify password
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "❌ User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "❌ Password is incorrect" });
+    }
+
+    // Delete user data
+    await User.deleteOne({ _id: req.user.id });
+    await Conversation.deleteOne({ userId: req.user.id });
+    await UserSettings.deleteOne({ userId: req.user.id });
+
+    res.json({ 
+      message: "✅ Account deleted successfully",
+      redirectUrl: "/login.html"
+    });
+
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    res.status(500).json({ message: "❌ Failed to delete account" });
+  }
+});
+
+// LOGOUT FROM ALL DEVICES
+app.post("/api/user/logout-all-devices", authenticateToken, async (req, res) => {
+  try {
+    // Clear all refresh tokens for this user
+    await User.updateOne(
+      { _id: req.user.id },
+      { refreshToken: null }
+    );
+
+    res.json({ 
+      message: "✅ Logged out from all devices",
+      redirectUrl: "/login.html"
+    });
+
+  } catch (error) {
+    console.error("Logout all error:", error);
+    res.status(500).json({ message: "❌ Failed to logout from all devices" });
+  }
+});
+
+// ============================================================
+// HELPER FUNCTION
+// ============================================================
+
+function calculateAccountAge(createdDate) {
+  const now = new Date();
+  const created = new Date(createdDate);
+  const diffTime = Math.abs(now - created);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 1) return "Less than 1 day";
+  if (diffDays === 1) return "1 day";
+  if (diffDays < 30) return `${diffDays} days`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months`;
+  return `${Math.floor(diffDays / 365)} years`;
+}
+
+/* ================= USER SETTINGS SCHEMA ================= */
+/* ADD THIS TO YOUR server.js (after other schemas) */
+
+const userSettingsSchema = new mongoose.Schema({
+  userId: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  theme: {
+    type: String,
+    enum: ["dark", "light"],
+    default: "dark"
+  },
+  notifications: {
+    type: Boolean,
+    default: true
+  },
+  autoDeleteChat: {
+    type: Boolean,
+    default: false
+  },
+  autoDeleteAfterDays: {
+    type: Number,
+    default: 30,
+    min: 7,
+    max: 365
+  },
+  language: {
+    type: String,
+    enum: ["en", "es", "fr", "de", "hi"],
+    default: "en"
+  },
+  enableExport: {
+    type: Boolean,
+    default: true
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const UserSettings = mongoose.model("UserSettings", userSettingsSchema);
 
 /* ================= CHAT ROUTE ================= */
 app.post("/chat", chatLimiter, authenticateToken, async (req, res) => {
