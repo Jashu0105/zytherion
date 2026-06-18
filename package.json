@@ -23,7 +23,7 @@
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
-    "resend": "^6.12.4",
+    "resend": "^6.14.0",
     "uuid": "^13.0.0"
   }
 }
