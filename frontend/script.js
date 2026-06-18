@@ -1,6 +1,6 @@
 // ============================================================
 // ZYTHERION AI - IMPROVED SCRIPT.JS
-// Features: Auto-grow textarea, copy buttons, delete buttons,
+// Features: Auto-grow textarea, copy buttons, edit buttons,
 // typing indicator, token refresh, better error handling
 // ============================================================
 
@@ -28,6 +28,7 @@ const TYPING_INDICATOR_TEXT = "Zytherion is thinking";
 let chatSessions = JSON.parse(localStorage.getItem("zytherion_sessions")) || [];
 let currentSessionId = localStorage.getItem("zytherion_current_session_id") || null;
 let isLoading = false; // Prevent duplicate messages
+let editingMessageIndex = null; // Track which message is being edited
 
 /* ================= INITIALIZATION ================= */
 document.addEventListener("DOMContentLoaded", () => {
@@ -135,16 +136,17 @@ The next-gen AI powered by adaptive reasoning and limitless creativity. Your ima
     }
 
     // Render all messages
-    activeSession.messages.forEach(item => {
-        appendChatBubbleUI(item.text, item.sender);
+    activeSession.messages.forEach((item, index) => {
+        appendChatBubbleUI(item.text, item.sender, index);
     });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function appendChatBubbleUI(text, sender) {
+function appendChatBubbleUI(text, sender, messageIndex = null) {
     const msgDiv = document.createElement("div");
     msgDiv.classList.add("message", sender);
+    msgDiv.setAttribute("data-message-index", messageIndex);
     
     // Create text content
     const textContent = document.createElement("div");
@@ -157,13 +159,108 @@ function appendChatBubbleUI(text, sender) {
     if (sender === "bot") {
         addCopyButton(msgDiv, text);
     } else if (sender === "user") {
-        addDeleteButton(msgDiv);
+        addUserActionButtons(msgDiv, text, messageIndex);
     }
     
     chatContainer.appendChild(msgDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
     
     return msgDiv;
+}
+
+// Add Copy + Edit buttons for user messages
+function addUserActionButtons(msgDiv, text, messageIndex) {
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = `
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    `;
+    
+    // Edit button
+    const editBtn = document.createElement("button");
+    editBtn.innerHTML = "✏️ Edit";
+    editBtn.style.cssText = `
+        padding: 6px 12px;
+        background: rgba(99, 102, 241, 0.15);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 6px;
+        color: #6366f1;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    `;
+    
+    editBtn.onmouseover = () => {
+        editBtn.style.background = "rgba(99, 102, 241, 0.25)";
+        editBtn.style.borderColor = "rgba(99, 102, 241, 0.5)";
+    };
+    
+    editBtn.onmouseout = () => {
+        editBtn.style.background = "rgba(99, 102, 241, 0.15)";
+        editBtn.style.borderColor = "rgba(99, 102, 241, 0.3)";
+    };
+    
+    editBtn.onclick = () => {
+        userInput.value = text;
+        userInput.style.height = 'auto';
+        autoGrowTextarea();
+        userInput.focus();
+        editingMessageIndex = messageIndex;
+        editBtn.innerHTML = "✓ Ready to edit";
+        editBtn.style.background = "rgba(16, 185, 129, 0.2)";
+        editBtn.style.borderColor = "rgba(16, 185, 129, 0.5)";
+    };
+    
+    // Copy button
+    const copyBtn = document.createElement("button");
+    copyBtn.innerHTML = "📋 Copy";
+    copyBtn.style.cssText = `
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: inherit;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    `;
+    
+    copyBtn.onmouseover = () => {
+        copyBtn.style.background = "rgba(209, 168, 92, 0.2)";
+        copyBtn.style.borderColor = "rgba(209, 168, 92, 0.5)";
+    };
+    
+    copyBtn.onmouseout = () => {
+        copyBtn.style.background = "rgba(255, 255, 255, 0.1)";
+        copyBtn.style.borderColor = "rgba(255, 255, 255, 0.2)";
+    };
+    
+    copyBtn.onclick = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.innerHTML = "✓ Copied!";
+            copyBtn.style.background = "rgba(16, 185, 129, 0.2)";
+            copyBtn.style.borderColor = "rgba(16, 185, 129, 0.5)";
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = "📋 Copy";
+                copyBtn.style.background = "rgba(255, 255, 255, 0.1)";
+                copyBtn.style.borderColor = "rgba(255, 255, 255, 0.2)";
+            }, 2000);
+        } catch (err) {
+            console.error("Copy failed:", err);
+            copyBtn.innerHTML = "❌ Copy failed";
+            setTimeout(() => copyBtn.innerHTML = "📋 Copy", 2000);
+        }
+    };
+    
+    buttonContainer.appendChild(editBtn);
+    buttonContainer.appendChild(copyBtn);
+    msgDiv.appendChild(buttonContainer);
 }
 
 // Copy button for bot messages
@@ -223,110 +320,82 @@ function addCopyButton(msgDiv, text) {
     msgDiv.appendChild(buttonContainer);
 }
 
-// Delete button for user messages
-function addDeleteButton(msgDiv) {
-    const buttonContainer = document.createElement("div");
-    buttonContainer.style.cssText = `
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
-        flex-wrap: wrap;
-    `;
-    
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerHTML = "🗑️ Delete";
-    deleteBtn.style.cssText = `
-        padding: 6px 12px;
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: 6px;
-        color: #ef4444;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    `;
-    
-    deleteBtn.onmouseover = () => {
-        deleteBtn.style.background = "rgba(239, 68, 68, 0.2)";
-        deleteBtn.style.borderColor = "rgba(239, 68, 68, 0.5)";
-    };
-    
-    deleteBtn.onmouseout = () => {
-        deleteBtn.style.background = "rgba(239, 68, 68, 0.1)";
-        deleteBtn.style.borderColor = "rgba(239, 68, 68, 0.3)";
-    };
-    
-    deleteBtn.onclick = () => {
-        if (confirm("Delete this message?")) {
-            msgDiv.style.opacity = "0";
-            msgDiv.style.transform = "translateY(-10px)";
-            msgDiv.style.transition = "all 0.3s ease";
-            
-            setTimeout(() => {
-                msgDiv.remove();
-                // Also remove from session data
-                const activeSession = chatSessions.find(s => s.id === currentSessionId);
-                if (activeSession) {
-                    activeSession.messages = activeSession.messages.filter(msg => msg.text !== msgDiv.textContent);
-                    saveStateToStorage();
-                }
-            }, 300);
-        }
-    };
-    
-    buttonContainer.appendChild(deleteBtn);
-    msgDiv.appendChild(buttonContainer);
-}
-
-// Sidebar session renderer
 function renderSidebarSessions() {
+    if (!localHistoryContainer) return;
+
     localHistoryContainer.innerHTML = "";
 
-    if (chatSessions.length === 0) {
-        const emptyTab = document.createElement("div");
-        emptyTab.classList.add("history-item");
-        emptyTab.style.color = "var(--text-muted)";
-        emptyTab.style.cursor = "default";
-        emptyTab.innerText = "No active records";
-        localHistoryContainer.appendChild(emptyTab);
-        return;
-    }
-
     chatSessions.forEach(session => {
-        const linkTab = document.createElement("div");
-        linkTab.classList.add("history-item");
-        linkTab.innerText = session.title;
+        const sessionBtn = document.createElement("button");
+        sessionBtn.textContent = session.title;
+        sessionBtn.style.cssText = `
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: ${currentSessionId === session.id ? "rgba(209, 168, 92, 0.2)" : "rgba(255, 255, 255, 0.05)"};
+            border: 1px solid ${currentSessionId === session.id ? "rgba(209, 168, 92, 0.5)" : "rgba(255, 255, 255, 0.1)"};
+            border-radius: 8px;
+            color: inherit;
+            cursor: pointer;
+            text-align: left;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        `;
 
-        // Highlight active session
-        if (session.id === currentSessionId) {
-            linkTab.style.background = "var(--glass-bg)";
-            linkTab.style.borderColor = "var(--glass-border)";
-            linkTab.style.fontWeight = "500";
-        }
+        sessionBtn.onmouseover = () => {
+            sessionBtn.style.background = "rgba(209, 168, 92, 0.15)";
+            sessionBtn.style.borderColor = "rgba(209, 168, 92, 0.4)";
+        };
 
-        // Click to switch session
-        linkTab.addEventListener("click", () => {
+        sessionBtn.onmouseout = () => {
+            if (currentSessionId !== session.id) {
+                sessionBtn.style.background = "rgba(255, 255, 255, 0.05)";
+                sessionBtn.style.borderColor = "rgba(255, 255, 255, 0.1)";
+            }
+        };
+
+        sessionBtn.onclick = () => {
             currentSessionId = session.id;
-            localStorage.setItem("zytherion_current_session_id", currentSessionId);
+            saveStateToStorage();
             renderSidebarSessions();
             renderActiveChatLogs();
-        });
+        };
 
-        localHistoryContainer.appendChild(linkTab);
+        localHistoryContainer.appendChild(sessionBtn);
     });
 }
 
 /* ================= TOKEN MANAGEMENT ================= */
-function checkTokenExpiry() {
-    const token = localStorage.getItem("token");
-    const refreshToken = localStorage.getItem("refreshToken");
-    
-    if (!token) return;
-    
+function decodeToken(token) {
     try {
-        // Decode JWT to check expiry (basic check)
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        
+        const decoded = JSON.parse(atob(parts[1]));
+        return decoded;
+    } catch (error) {
+        console.error("Token decode error:", error);
+        return null;
+    }
+}
+
+function checkTokenExpiry() {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const payload = decodeToken(token);
+        if (!payload || !payload.exp) {
+            throw new Error("Invalid token payload");
+        }
+
         const expiryTime = payload.exp * 1000; // Convert to milliseconds
         const now = Date.now();
         const timeUntilExpiry = expiryTime - now;
@@ -404,10 +473,11 @@ async function sendMessage() {
 
     // Add user message
     activeSession.messages.push({ text: message, sender: "user" });
-    appendChatBubbleUI(message, "user");
+    appendChatBubbleUI(message, "user", activeSession.messages.length - 1);
     userInput.value = "";
     userInput.style.height = 'auto'; // Reset textarea height
     updateCharacterCounter();
+    editingMessageIndex = null; // Reset editing state
     saveStateToStorage();
     renderSidebarSessions();
 
@@ -480,7 +550,7 @@ async function sendMessage() {
 
         // Add bot response
         activeSession.messages.push({ text: botReplyText, sender: "bot" });
-        appendChatBubbleUI(botReplyText, "bot");
+        appendChatBubbleUI(botReplyText, "bot", activeSession.messages.length - 1);
         saveStateToStorage();
 
     } catch (error) {
