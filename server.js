@@ -10,8 +10,13 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const { body, validationResult } = require("express-validator");
 const emailValidator = require("email-validator");
+const { Resend } = require("resend");
+const crypto = require("crypto");
 
 const app = express();
+
+/* ================= RESEND EMAIL SERVICE ================= */
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ================= MIDDLEWARE ================= */
 // Security headers
@@ -428,6 +433,99 @@ app.post("/api/auth/refresh", async (req, res) => {
     }
     res.status(401).json({ message: "❌ Invalid refresh token" });
   }
+});
+
+/* ============================================================================
+   PHASE 6: PASSWORD RESET ROUTES
+   ============================================================================ */
+
+// FORGOT PASSWORD - Send reset email
+app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(200).json({ message: "If email exists, reset link sent" });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = resetTokenExpiry;
+        await user.save();
+
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password.html?token=${resetToken}`;
+
+        await resend.emails.send({
+            from: 'noreply@zytherion.app',
+            to: email,
+            subject: '🔐 Zytherion AI - Reset Your Password',
+            html: `
+                <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #070a13 0%, #02040a 100%); padding: 40px; border-radius: 20px; text-align: center;">
+                        <h2 style="color: #f8fafc; margin-bottom: 10px;">Reset Your Password</h2>
+                        <p style="color: #64748b; margin-bottom: 30px;">Click the button below to reset your password. This link expires in 1 hour.</p>
+                        
+                        <a href="${resetLink}" style="display: inline-block; background: #d1a85c; color: #02040a; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; margin-bottom: 20px;">Reset Password</a>
+
+                        <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">Or copy this link: <br><code style="color: #d1a85c;">${resetLink}</code></p>
+
+                        <p style="color: #64748b; font-size: 12px; margin-top: 30px;">If you didn't request this, ignore this email.</p>
+                    </div>
+                </div>
+            `
+        });
+
+        res.status(200).json({ message: "Reset link sent to email" });
+
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ message: "Error sending reset email" });
+    }
+});
+
+// RESET PASSWORD - Update password with token
+app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({ message: "Token and password required" });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters" });
+        }
+
+        const user = await User.findOne({
+            resetToken: token,
+            resetTokenExpiry: { $gt: new Date() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired reset token" });
+        }
+
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        user.password = hashedPassword;
+        user.resetToken = null;
+        user.resetTokenExpiry = null;
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successful" });
+
+    } catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({ message: "Error resetting password" });
+    }
 });
 
 /* ================= USER PROFILE ROUTES ================= */
