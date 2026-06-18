@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zytherion AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
@@ -558,6 +559,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <span>Feedback</span>
                 </a>
+                <button class="ui-btn" onclick="showExportMenu()">📥 Export Chat</button>
                 <button class="ui-btn" id="themeToggleBtn">🌓 Theme</button>
                 <button class="ui-btn" id="logoutBtn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.15);">Logout</button>
             </div>

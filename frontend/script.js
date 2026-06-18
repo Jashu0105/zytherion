@@ -642,3 +642,268 @@ clearLogsBtn.addEventListener("click", () => {
         showErrorNotification("All chat history cleared ✓");
     }
 });
+/* ============================================================================
+   PHASE 8: MESSAGE EXPORT - ADD THIS TO YOUR SCRIPT.JS
+   ============================================================================ */
+
+// Export current chat as JSON
+function exportAsJSON() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showErrorNotification("No messages to export");
+        return;
+    }
+
+    const exportData = {
+        title: activeSession.title,
+        date: new Date().toLocaleString(),
+        messageCount: activeSession.messages.length,
+        messages: activeSession.messages
+    };
+
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zytherion-chat-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showErrorNotification("✅ Chat exported as JSON");
+}
+
+// Export current chat as TXT
+function exportAsTXT() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showErrorNotification("No messages to export");
+        return;
+    }
+
+    let txtContent = `ZYTHERION AI - Chat Export\n`;
+    txtContent += `Title: ${activeSession.title}\n`;
+    txtContent += `Date: ${new Date().toLocaleString()}\n`;
+    txtContent += `Messages: ${activeSession.messages.length}\n`;
+    txtContent += `${'='.repeat(60)}\n\n`;
+
+    activeSession.messages.forEach((msg, index) => {
+        const sender = msg.sender === 'user' ? '👤 YOU' : '🤖 ZYTHERION';
+        txtContent += `[${index + 1}] ${sender}\n`;
+        txtContent += `${msg.text}\n`;
+        txtContent += `${'-'.repeat(60)}\n`;
+    });
+
+    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zytherion-chat-${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showErrorNotification("✅ Chat exported as TXT");
+}
+
+// Export current chat as PDF (using jsPDF)
+function exportAsPDF() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showErrorNotification("No messages to export");
+        return;
+    }
+
+    // Check if jsPDF is loaded
+    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        showErrorNotification("PDF library loading... Please try again in a moment");
+        return;
+    }
+
+    try {
+        const { jsPDF } = jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPosition = 20;
+        const lineHeight = 7;
+        const maxWidth = pageWidth - 20;
+
+        // Header
+        doc.setFontSize(16);
+        doc.text('Zytherion AI - Chat Export', 10, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.text(`Title: ${activeSession.title}`, 10, yPosition);
+        yPosition += 6;
+        doc.text(`Date: ${new Date().toLocaleString()}`, 10, yPosition);
+        yPosition += 6;
+        doc.text(`Total Messages: ${activeSession.messages.length}`, 10, yPosition);
+        yPosition += 10;
+
+        doc.setDrawColor(200);
+        doc.line(10, yPosition, pageWidth - 10, yPosition);
+        yPosition += 10;
+
+        // Messages
+        doc.setFontSize(9);
+        activeSession.messages.forEach((msg, index) => {
+            const sender = msg.sender === 'user' ? '👤 You' : '🤖 Zytherion';
+            
+            // Check if we need a new page
+            if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+            }
+
+            // Sender label
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(209, 168, 92); // Gold color
+            doc.text(`[${index + 1}] ${sender}`, 10, yPosition);
+            yPosition += lineHeight;
+
+            // Message text
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            const lines = doc.splitTextToSize(msg.text, maxWidth - 10);
+            doc.text(lines, 15, yPosition);
+            yPosition += lines.length * lineHeight + 5;
+
+            // Separator
+            doc.setDrawColor(220);
+            doc.line(10, yPosition, pageWidth - 10, yPosition);
+            yPosition += 5;
+        });
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text('Exported from Zytherion AI', 10, pageHeight - 10);
+
+        doc.save(`zytherion-chat-${Date.now()}.pdf`);
+        showErrorNotification("✅ Chat exported as PDF");
+
+    } catch (error) {
+        console.error("PDF export error:", error);
+        showErrorNotification("PDF export failed: " + error.message);
+    }
+}
+
+// Show export menu
+function showExportMenu() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(209, 168, 92, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 400px;
+        text-align: center;
+        backdrop-filter: blur(20px);
+    `;
+
+    content.innerHTML = `
+        <h2 style="color: #d1a85c; margin-bottom: 20px; font-size: 24px;">📥 Export Chat</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Choose export format:</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button id="exportJSON" style="
+                padding: 12px 20px;
+                background: rgba(99, 102, 241, 0.2);
+                border: 1px solid rgba(99, 102, 241, 0.4);
+                border-radius: 8px;
+                color: #6366f1;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+            ">📄 Export as JSON</button>
+            
+            <button id="exportTXT" style="
+                padding: 12px 20px;
+                background: rgba(16, 185, 129, 0.2);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                border-radius: 8px;
+                color: #10b981;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+            ">📝 Export as TXT</button>
+            
+            <button id="exportPDF" style="
+                padding: 12px 20px;
+                background: rgba(239, 68, 68, 0.2);
+                border: 1px solid rgba(239, 68, 68, 0.4);
+                border-radius: 8px;
+                color: #ef4444;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+            ">🔴 Export as PDF</button>
+            
+            <button id="closeExport" style="
+                padding: 12px 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+                color: inherit;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+                margin-top: 10px;
+            ">Cancel</button>
+        </div>
+    `;
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    document.getElementById('exportJSON').onclick = () => {
+        exportAsJSON();
+        modal.remove();
+    };
+
+    document.getElementById('exportTXT').onclick = () => {
+        exportAsTXT();
+        modal.remove();
+    };
+
+    document.getElementById('exportPDF').onclick = () => {
+        exportAsPDF();
+        modal.remove();
+    };
+
+    document.getElementById('closeExport').onclick = () => {
+        modal.remove();
+    };
+
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+}
+
+/* ============================================================================
+   END PHASE 8 CODE - Add the above to your script.js
+   ============================================================================ */
