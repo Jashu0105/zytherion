@@ -54,8 +54,8 @@
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
-            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
@@ -133,6 +133,7 @@
             font-size: 19px;
             font-weight: 600;
             letter-spacing: -0.3px;
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -235,8 +236,8 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 14px;
-            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
             display: flex;
             align-items: flex-end;
             padding: 8px;
@@ -288,6 +289,7 @@
             font-size: 12px;
             color: var(--text-muted);
             pointer-events: none;
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -304,6 +306,25 @@
             height: 44px;
             white-space: nowrap;
             flex-shrink: 0;
+        }
+
+        /* Utility button variants to avoid inline styles */
+        .ui-btn.primary {
+            justify-content: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+            border-color: var(--accent);
+        }
+
+        .ui-btn.small {
+            margin-top: auto;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .ui-btn.danger {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.15);
         }
 
         .send-action-btn:hover {
@@ -536,12 +557,12 @@
   <div class="sidebar">       
         <div class="sidebar-header">Local Workspaces</div>
         
-        <button class="ui-btn" id="newChatBtn" style="justify-content: center; margin-bottom: 16px; font-weight: 600; border-color: var(--accent);">
+        <button type="button" class="ui-btn primary" id="newChatBtn">
             + New Chat
         </button>
 
         <div class="local-history-container" id="localHistory"></div>
-        <button class="ui-btn" id="clearLogsBtn" style="margin-top: auto; justify-content: center; font-size: 12px;">
+        <button type="button" class="ui-btn small" id="clearLogsBtn">
             Clear Local Logs
         </button>
     </div>
@@ -563,7 +584,7 @@
                 <button class="ui-btn" onclick="showAdvancedSearch()">🔍 Search Current</button>
                 <button class="ui-btn" onclick="searchAllSessions()">🔎 Search All</button>
                 <button class="ui-btn" id="themeToggleBtn">🌓 Theme</button>
-                <button class="ui-btn" id="logoutBtn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.15);">Logout</button>
+                <button type="button" class="ui-btn danger" id="logoutBtn">Logout</button>
             </div>
         </div>
 
