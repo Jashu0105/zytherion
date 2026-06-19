@@ -907,3 +907,405 @@ function showExportMenu() {
 /* ============================================================================
    END PHASE 8 CODE - Add the above to your script.js
    ============================================================================ */
+   /* ============================================================================
+   PHASE 9: ADVANCED SEARCH - ADD THIS TO YOUR SCRIPT.JS
+   ============================================================================ */
+
+// Search state
+let searchResults = [];
+let currentSearchQuery = "";
+
+// Show advanced search modal
+function showAdvancedSearch() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(209, 168, 92, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        text-align: left;
+        backdrop-filter: blur(20px);
+    `;
+
+    content.innerHTML = `
+        <h2 style="color: #d1a85c; margin-bottom: 20px; font-size: 24px;">🔍 Advanced Search</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Keyword Search -->
+            <div>
+                <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Keyword</label>
+                <input type="text" id="searchKeyword" placeholder="Search messages..." style="
+                    width: 100%;
+                    padding: 12px 16px;
+                    background: rgba(4, 6, 10, 0.6);
+                    border: 1px solid rgba(209, 168, 92, 0.2);
+                    border-radius: 8px;
+                    color: #f8fafc;
+                    font-size: 14px;
+                    outline: none;
+                    transition: all 0.2s;
+                " onkeyup="this.style.borderColor = this.value ? 'rgba(209, 168, 92, 0.5)' : 'rgba(209, 168, 92, 0.2)'">
+            </div>
+
+            <!-- Filter by Message Type -->
+            <div>
+                <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Message Type</label>
+                <div style="display: flex; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+                        <input type="radio" name="messageType" value="all" checked>
+                        All Messages
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+                        <input type="radio" name="messageType" value="user">
+                        Your Messages
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+                        <input type="radio" name="messageType" value="bot">
+                        AI Responses
+                    </label>
+                </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div>
+                <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Date Range</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="display: block; color: #64748b; margin-bottom: 5px; font-size: 12px;">From</label>
+                        <input type="date" id="dateFrom" style="
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: rgba(4, 6, 10, 0.6);
+                            border: 1px solid rgba(209, 168, 92, 0.2);
+                            border-radius: 8px;
+                            color: #f8fafc;
+                            font-size: 13px;
+                            outline: none;
+                        ">
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="display: block; color: #64748b; margin-bottom: 5px; font-size: 12px;">To</label>
+                        <input type="date" id="dateTo" style="
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: rgba(4, 6, 10, 0.6);
+                            border: 1px solid rgba(209, 168, 92, 0.2);
+                            border-radius: 8px;
+                            color: #f8fafc;
+                            font-size: 13px;
+                            outline: none;
+                        ">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="searchBtn" style="
+                    flex: 1;
+                    padding: 12px 20px;
+                    background: linear-gradient(135deg, #d1a85c 0%, #b89146 100%);
+                    border: none;
+                    border-radius: 8px;
+                    color: #02040a;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                ">🔍 Search</button>
+                
+                <button id="closeSearch" style="
+                    flex: 1;
+                    padding: 12px 20px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 8px;
+                    color: inherit;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                ">Cancel</button>
+            </div>
+
+            <!-- Results Display -->
+            <div id="searchResults" style="
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(209, 168, 92, 0.1);
+                border-radius: 8px;
+                padding: 16px;
+                max-height: 300px;
+                overflow-y: auto;
+                display: none;
+            ">
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    `;
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    // Set today's date as default end date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateTo').value = today;
+
+    // Set a week ago as default start date
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    document.getElementById('dateFrom').value = weekAgo;
+
+    document.getElementById('searchBtn').onclick = performSearch;
+    document.getElementById('closeSearch').onclick = () => modal.remove();
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+}
+
+// Perform the search
+function performSearch() {
+    const keyword = document.getElementById('searchKeyword').value.toLowerCase();
+    const messageType = document.querySelector('input[name="messageType"]:checked').value;
+    const dateFrom = new Date(document.getElementById('dateFrom').value || '2000-01-01');
+    const dateTo = new Date(document.getElementById('dateTo').value || '2099-12-31');
+    dateTo.setHours(23, 59, 59); // Include entire last day
+
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession) {
+        showErrorNotification("No active session to search");
+        return;
+    }
+
+    // Filter messages
+    searchResults = activeSession.messages.filter(msg => {
+        // Check keyword match
+        const matchesKeyword = !keyword || msg.text.toLowerCase().includes(keyword);
+        
+        // Check message type
+        const matchesType = messageType === 'all' || msg.sender === messageType;
+        
+        // Check date range (assume messages were created during this session)
+        const messageDate = new Date(activeSession.timestamp || Date.now());
+        const matchesDate = messageDate >= dateFrom && messageDate <= dateTo;
+        
+        return matchesKeyword && matchesType && matchesDate;
+    });
+
+    displaySearchResults(keyword, messageType);
+}
+
+// Display search results
+function displaySearchResults(keyword, messageType) {
+    const resultsDiv = document.getElementById('searchResults');
+    const resultsContent = document.getElementById('resultsContent');
+    
+    resultsContent.innerHTML = '';
+    
+    if (searchResults.length === 0) {
+        resultsContent.innerHTML = `<p style="color: #64748b; text-align: center; padding: 20px;">No messages found</p>`;
+        resultsDiv.style.display = 'block';
+        return;
+    }
+
+    let html = `<p style="color: #d1a85c; margin-bottom: 15px; font-weight: 600;">Found ${searchResults.length} result(s)</p>`;
+    
+    searchResults.forEach((msg, index) => {
+        const sender = msg.sender === 'user' ? '👤 You' : '🤖 AI';
+        let displayText = msg.text;
+        
+        // Highlight keyword if provided
+        if (keyword) {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            displayText = displayText.replace(regex, '<span style="background: rgba(209, 168, 92, 0.5); color: #fff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+        }
+        
+        html += `
+            <div style="
+                background: rgba(209, 168, 92, 0.08);
+                border: 1px solid rgba(209, 168, 92, 0.15);
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 10px;
+            ">
+                <p style="color: #d1a85c; font-size: 12px; font-weight: 600; margin-bottom: 6px;">${sender}</p>
+                <p style="color: #f8fafc; font-size: 13px; line-height: 1.5;">${displayText}</p>
+            </div>
+        `;
+    });
+    
+    resultsContent.innerHTML = html;
+    resultsDiv.style.display = 'block';
+}
+
+// Search in all sessions
+function searchAllSessions() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(209, 168, 92, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+    `;
+
+    content.innerHTML = `
+        <h2 style="color: #d1a85c; margin-bottom: 20px; font-size: 24px;">🔎 Search All Sessions</h2>
+        
+        <input type="text" id="globalSearchKeyword" placeholder="Search across all chats..." style="
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(4, 6, 10, 0.6);
+            border: 1px solid rgba(209, 168, 92, 0.2);
+            border-radius: 8px;
+            color: #f8fafc;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        " onkeyup="this.style.borderColor = this.value ? 'rgba(209, 168, 92, 0.5)' : 'rgba(209, 168, 92, 0.2)'">
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button id="globalSearchBtn" style="
+                flex: 1;
+                padding: 12px 20px;
+                background: linear-gradient(135deg, #d1a85c 0%, #b89146 100%);
+                border: none;
+                border-radius: 8px;
+                color: #02040a;
+                cursor: pointer;
+                font-weight: 600;
+            ">Search</button>
+            
+            <button id="closeGlobalSearch" style="
+                flex: 1;
+                padding: 12px 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+                color: inherit;
+                cursor: pointer;
+                font-weight: 600;
+            ">Cancel</button>
+        </div>
+
+        <div id="globalSearchResults" style="
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(209, 168, 92, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        ">
+            <div id="globalResultsContent"></div>
+        </div>
+    `;
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    document.getElementById('globalSearchBtn').onclick = () => {
+        const keyword = document.getElementById('globalSearchKeyword').value.toLowerCase();
+        if (!keyword) {
+            showErrorNotification("Please enter a search term");
+            return;
+        }
+
+        const allResults = [];
+        chatSessions.forEach(session => {
+            const matches = session.messages.filter(msg => 
+                msg.text.toLowerCase().includes(keyword)
+            );
+            if (matches.length > 0) {
+                allResults.push({
+                    sessionTitle: session.title,
+                    messages: matches
+                });
+            }
+        });
+
+        const resultsDiv = document.getElementById('globalSearchResults');
+        const resultsContent = document.getElementById('globalResultsContent');
+        resultsContent.innerHTML = '';
+
+        if (allResults.length === 0) {
+            resultsContent.innerHTML = `<p style="color: #64748b; text-align: center;">No results found in any session</p>`;
+            resultsDiv.style.display = 'block';
+            return;
+        }
+
+        let html = `<p style="color: #d1a85c; margin-bottom: 15px; font-weight: 600;">Found in ${allResults.length} session(s)</p>`;
+        
+        allResults.forEach(result => {
+            html += `<h3 style="color: #d1a85c; font-size: 13px; margin: 15px 0 10px 0; font-weight: 600;">📌 ${result.sessionTitle}</h3>`;
+            
+            result.messages.forEach(msg => {
+                const sender = msg.sender === 'user' ? '👤' : '🤖';
+                let displayText = msg.text;
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                displayText = displayText.replace(regex, '<span style="background: rgba(209, 168, 92, 0.5); color: #fff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+                
+                html += `
+                    <div style="
+                        background: rgba(209, 168, 92, 0.08);
+                        border: 1px solid rgba(209, 168, 92, 0.15);
+                        border-radius: 8px;
+                        padding: 10px;
+                        margin-bottom: 8px;
+                    ">
+                        <p style="color: #f8fafc; font-size: 12px; line-height: 1.5;">${sender} ${displayText}</p>
+                    </div>
+                `;
+            });
+        });
+        
+        resultsContent.innerHTML = html;
+        resultsDiv.style.display = 'block';
+    };
+
+    document.getElementById('closeGlobalSearch').onclick = () => modal.remove();
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+}
+
+/* ============================================================================
+   END PHASE 9 CODE - Add the above to your script.js
+   ============================================================================ */
