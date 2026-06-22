@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Zytherion AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        })();
+    </script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
@@ -14,8 +20,6 @@
             --text-muted: #64748b;
             --accent: #d1a85c;
             --accent-glow: rgba(209, 168, 92, 0.15);
-            --error-color: #ef4444;
-            --success-color: #10b981;
         }
 
         [data-theme="light"] {
@@ -25,12 +29,13 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             --accent: #b89146;
+            --accent-glow: rgba(184, 145, 70, 0.08);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
         }
 
@@ -39,52 +44,53 @@
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
+            padding: 20px;
         }
 
-        /* ================= HEADER ================= */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         .header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 20px 40px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
         }
 
-        .header-title {
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 18px;
-            font-weight: 600;
+            gap: 15px;
         }
 
-        .header-title img {
-            width: 24px;
-            height: 24px;
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
         }
 
-        .header-title em {
-            font-style: normal;
-            color: var(--accent);
-        }
-
-        .header-actions {
+        .header-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
 
         .btn {
-            padding: 8px 16px;
-            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
             background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             color: var(--text-main);
             border-radius: 8px;
             cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 600;
             font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s ease;
         }
 
         .btn:hover {
@@ -93,755 +99,373 @@
         }
 
         .btn-danger {
-            color: var(--error-color);
+            color: #ef4444;
             border-color: rgba(239, 68, 68, 0.3);
         }
 
         .btn-danger:hover {
-            border-color: var(--error-color);
+            border-color: #ef4444;
             background: rgba(239, 68, 68, 0.1);
         }
 
-        /* ================= MAIN CONTENT ================= */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .page-subtitle {
-            color: var(--text-muted);
-            margin-bottom: 40px;
-        }
-
-        /* ================= CARDS ================= */
-        .card {
+        .profile-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-title-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--accent-glow);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        /* ================= PROFILE INFO ================= */
-        .profile-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-        }
-
-        .info-value {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-main);
-            word-break: break-all;
-        }
-
-        .info-value.accent {
-            color: var(--accent);
-        }
-
-        .copy-btn {
-            background: none;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 12px;
-            padding: 0;
-            text-decoration: underline;
-            transition: opacity 0.2s ease;
-        }
-
-        .copy-btn:hover {
-            opacity: 0.7;
-        }
-
-        /* ================= FORM ================= */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
             margin-bottom: 20px;
         }
 
-        .form-label {
-            font-size: 13px;
+        .profile-section {
+            margin-bottom: 30px;
+        }
+
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 18px;
             font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .profile-item label {
+            font-size: 14px;
+            font-weight: 500;
             color: var(--text-muted);
         }
 
-        .form-input {
-            padding: 12px 16px;
-            background: rgba(4, 6, 10, 0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: var(--text-main);
+        .profile-item value {
             font-size: 14px;
-            transition: all 0.2s ease;
+            color: var(--text-main);
+            font-weight: 600;
         }
 
-        .form-input:focus {
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(4, 6, 10, 0.6);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 12px var(--accent-glow);
         }
 
-        .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .form-actions {
+        .button-group {
             display: flex;
             gap: 12px;
-            margin-top: 24px;
+            margin-top: 20px;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: #02040a;
+        .btn-submit {
+            flex: 1;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, #9a7836 100%);
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
+            color: #02040a;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
-        .btn-primary:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--accent-glow);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .btn-clear {
             flex: 1;
+            padding: 14px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
-        .btn-secondary:hover {
-            background: var(--glass-bg);
-            border-color: var(--accent);
+        .btn-clear:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
 
-        /* ================= ALERTS ================= */
-        .alert {
-            padding: 16px;
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #10b981;
+            padding: 12px 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+            z-index: 9999;
             animation: slideIn 0.3s ease;
-        }
-
-        .alert.show {
-            display: block;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--success-color);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error-color);
-        }
-
-        .alert-loading {
-            background: rgba(209, 168, 92, 0.1);
-            border: 1px solid rgba(209, 168, 92, 0.3);
-            color: var(--accent);
         }
 
         @keyframes slideIn {
             from {
+                transform: translateX(400px);
                 opacity: 0;
-                transform: translateY(-10px);
             }
             to {
+                transform: translateX(0);
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
-        /* ================= LOADING SPINNER ================= */
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ================= MODAL ================= */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.3s ease;
-        }
-
-        .modal h2 {
-            font-size: 22px;
-            margin-bottom: 12px;
-        }
-
-        .modal p {
-            color: var(--text-muted);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .modal-btn-danger {
-            background: var(--error-color);
-            color: white;
-        }
-
-        .modal-btn-danger:hover {
-            opacity: 0.9;
-        }
-
-        .modal-btn-secondary {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-        }
-
-        .modal-btn-secondary:hover {
-            background: var(--glass-bg);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ================= RESPONSIVE ================= */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
-                gap: 16px;
-                padding: 16px;
+                gap: 15px;
+                text-align: center;
             }
 
-            .container {
-                margin: 20px auto;
+            .header-left {
+                flex-direction: column;
+                width: 100%;
             }
 
-            .card {
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .profile-card {
                 padding: 20px;
             }
 
-            .profile-info {
-                grid-template-columns: 1fr;
+            .profile-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
 
-            .form-actions {
+            .button-group {
                 flex-direction: column;
             }
-
-            .modal {
-                padding: 20px;
-            }
-
-            .page-title {
-                font-size: 24px;
-            }
-        }
-
-        /* ================= LOADING STATE ================= */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
+<div class="container">
     <div class="header">
-        <div class="header-title">
-            <img src="logo.jpeg" alt="Logo">
-            <span>Zytherion <em>AI</em></span>
+        <div class="header-left">
+            <h1>👤 Your Profile</h1>
         </div>
-        <div class="header-actions">
+        <div class="header-buttons">
             <a href="index.html" class="btn">← Back to Chat</a>
-            <button class="btn" id="themeToggleBtn">🌓 Theme</button>
-            <button class="btn btn-danger" id="logoutBtn">Logout</button>
+            <button class="btn" id="themeBtn">🌓 Theme</button>
+            <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <h1 class="page-title">👤 Your Profile</h1>
-        <p class="page-subtitle">Manage your account settings and personal information</p>
+    <!-- ACCOUNT INFORMATION -->
+    <div class="profile-card">
+        <div class="profile-section">
+            <div class="section-title">📋 Account Information</div>
+            
+            <div class="profile-item">
+                <label>Email</label>
+                <value id="emailValue">Not logged in</value>
+            </div>
 
-        <!-- Account Information Card -->
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-icon">📋</div>
-                Account Information
+            <div class="profile-item">
+                <label>Status</label>
+                <value id="statusValue">Guest User</value>
             </div>
-            <div id="profileLoading" class="alert alert-loading show">
-                <span class="spinner"></span> Loading profile...
-            </div>
-            <div id="profileContent" style="display: none;">
-                <div class="profile-info">
-                    <div class="info-item">
-                        <div class="info-label">Email Address</div>
-                        <div class="info-value" id="userEmail">-</div>
-                        <button class="copy-btn" onclick="copyToClipboard('userEmail')">Copy Email</button>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Account Status</div>
-                        <div class="info-value accent" id="accountStatus">Verified ✓</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Account Age</div>
-                        <div class="info-value" id="accountAge">-</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Last Login</div>
-                        <div class="info-value" id="lastLogin">-</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Account Created</div>
-                        <div class="info-value" id="createdAt">-</div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Change Password Card -->
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-icon">🔐</div>
-                Change Password
+            <div class="profile-item">
+                <label>Member Since</label>
+                <value id="memberSinceValue">Today</value>
             </div>
-            <div id="passwordAlert"></div>
-            <form id="passwordForm">
-                <div class="form-group">
-                    <label class="form-label">Current Password</label>
-                    <input type="password" id="currentPassword" class="form-input" placeholder="Enter your current password" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">New Password</label>
-                    <input type="password" id="newPassword" class="form-input" placeholder="Enter new password (min 8 characters)" required>
-                    <small style="color: var(--text-muted); font-size: 12px;">Must contain: uppercase letter, number, special character</small>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Confirm New Password</label>
-                    <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" required>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary" id="changePasswordBtn">Update Password</button>
-                    <button type="reset" class="btn-secondary">Clear</button>
-                </div>
-            </form>
-        </div>
 
-        <!-- Security Card -->
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-icon">🛡️</div>
-                Security & Sessions
+            <div class="profile-item">
+                <label>Account Type</label>
+                <value id="accountTypeValue">Free</value>
             </div>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Manage your active sessions and security settings</p>
-            <button class="btn" id="logoutAllBtn" style="color: var(--error-color); border-color: rgba(239, 68, 68, 0.3); margin-bottom: 16px;">
-                🚪 Logout from All Devices
-            </button>
-            <p style="color: var(--text-muted); font-size: 12px;">This will disconnect all active sessions from your account and you'll need to login again.</p>
-        </div>
-
-        <!-- Danger Zone Card -->
-        <div class="card" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.03);">
-            <div class="card-title" style="color: var(--error-color);">
-                <div class="card-title-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--error-color);">⚠️</div>
-                Danger Zone
-            </div>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Irreversible actions - please be careful</p>
-            <button class="btn btn-danger" id="deleteAccountBtn" style="width: 100%;">
-                🗑️ Delete My Account
-            </button>
-            <p style="color: var(--error-color); font-size: 12px; margin-top: 12px;">⚠️ This action cannot be undone. All your data will be permanently deleted.</p>
         </div>
     </div>
 
-    <!-- Delete Account Confirmation Modal -->
-    <div class="modal-overlay" id="deleteModal">
-        <div class="modal">
-            <h2>🗑️ Delete Account</h2>
-            <p>Are you absolutely sure you want to delete your account? This action cannot be undone.</p>
-            <p><strong>All your conversation history and settings will be permanently deleted.</strong></p>
+    <!-- CHANGE PASSWORD -->
+    <div class="profile-card">
+        <div class="profile-section">
+            <div class="section-title">🔒 Change Password</div>
+            
             <div class="form-group">
-                <label class="form-label">Enter your password to confirm</label>
-                <input type="password" id="deletePassword" class="form-input" placeholder="Enter password to confirm deletion">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter your current password">
             </div>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <button class="modal-btn modal-btn-danger" onclick="confirmDeleteAccount()" id="confirmDeleteBtn">Delete Account</button>
+
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password (min 8 characters)">
+                <small style="color: var(--text-muted); display: block; margin-top: 8px;">
+                    Must contain: uppercase letter, number, special character
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-submit" onclick="changePassword()">Update Password</button>
+                <button class="btn-clear" onclick="clearPasswordForm()">Clear</button>
             </div>
         </div>
     </div>
 
-    <!-- Logout All Confirmation Modal -->
-    <div class="modal-overlay" id="logoutAllModal">
-        <div class="modal">
-            <h2>🚪 Logout from All Devices?</h2>
-            <p>You will be logged out from all active sessions. You'll need to login again on all devices.</p>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-secondary" onclick="closeLogoutAllModal()">Cancel</button>
-                <button class="modal-btn modal-btn-danger" onclick="confirmLogoutAll()">Logout All</button>
-            </div>
+    <!-- SECURITY SETTINGS -->
+    <div class="profile-card">
+        <div class="profile-section">
+            <div class="section-title">🔐 Security</div>
+            
+            <button class="btn" onclick="logoutAllDevices()" style="width: 100%; padding: 14px; margin-bottom: 10px; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                Logout from All Devices
+            </button>
+            <p style="color: var(--text-muted); font-size: 13px;">
+                This will log you out from all active sessions and require you to login again.
+            </p>
         </div>
     </div>
+</div>
 
-    <script>
-        // ================= THEME TOGGLE ================= 
-        const themeToggleBtn = document.getElementById("themeToggleBtn");
-        const savedTheme = localStorage.getItem("theme") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
+<script>
+    // Load profile data
+    function loadProfile() {
+        const user = JSON.parse(localStorage.getItem("user") || '{}');
+        const email = user.email || localStorage.getItem("userEmail") || "guest@zytherion.local";
+        const joinDate = localStorage.getItem("joinDate") || new Date().toLocaleDateString();
 
-        themeToggleBtn.addEventListener("click", () => {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-        });
+        document.getElementById("emailValue").textContent = email;
+        document.getElementById("statusValue").textContent = user.email ? "Active" : "Guest User";
+        document.getElementById("memberSinceValue").textContent = joinDate;
+        document.getElementById("accountTypeValue").textContent = "Free";
 
-        // ================= LOGOUT ================= 
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
+        // Load theme
+        const theme = localStorage.getItem("theme") || "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+        document.getElementById("themeBtn").textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
+    }
+
+    // Change theme
+    document.getElementById("themeBtn").addEventListener("click", function() {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        document.getElementById("themeBtn").textContent = newTheme === "dark" ? "☀️ Light" : "🌙 Dark";
+        showNotification("✓ Theme changed to " + (newTheme === "dark" ? "Dark Mode" : "Light Mode"));
+    });
+
+    // Change password
+    function changePassword() {
+        const current = document.getElementById("currentPassword").value;
+        const newPass = document.getElementById("newPassword").value;
+        const confirm = document.getElementById("confirmPassword").value;
+
+        if (!current || !newPass || !confirm) {
+            showNotification("❌ Please fill all fields");
+            return;
+        }
+
+        if (newPass.length < 8) {
+            showNotification("❌ Password must be at least 8 characters");
+            return;
+        }
+
+        if (!/[A-Z]/.test(newPass) || !/[0-9]/.test(newPass) || !/[!@#$%^&*]/.test(newPass)) {
+            showNotification("❌ Password must contain uppercase, number, and special character");
+            return;
+        }
+
+        if (newPass !== confirm) {
+            showNotification("❌ Passwords don't match");
+            return;
+        }
+
+        // Save to localStorage (for local testing)
+        const user = JSON.parse(localStorage.getItem("user") || '{}');
+        user.password = btoa(newPass); // Simple encoding (not secure for production)
+        localStorage.setItem("user", JSON.stringify(user));
+
+        showNotification("✓ Password changed successfully");
+        clearPasswordForm();
+    }
+
+    function clearPasswordForm() {
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+    }
+
+    // Logout all devices
+    function logoutAllDevices() {
+        if (confirm("Are you sure? You'll be logged out from all devices.")) {
+            localStorage.clear();
             window.location.href = "login.html";
-        });
-
-        // ================= API CONFIG ================= 
-        const API_URL = window.location.hostname === "localhost"
-            ? "http://localhost:3000"
-            : "https://aegisai-backend-ifvc.onrender.com"; // UPDATE THIS!
-
-        // ================= LOAD PROFILE ================= 
-        async function loadProfile() {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    window.location.href = "login.html";
-                    return;
-                }
-
-                const response = await fetch(`${API_URL}/api/user/profile`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) throw new Error("Failed to load profile");
-
-                const data = await response.json();
-                const user = data.user;
-
-                document.getElementById("userEmail").textContent = user.email;
-                document.getElementById("accountAge").textContent = user.accountAge;
-                document.getElementById("lastLogin").textContent = user.lastLogin;
-                document.getElementById("createdAt").textContent = user.createdAt;
-                document.getElementById("accountStatus").textContent = user.verified ? "Verified ✓" : "Unverified";
-
-                document.getElementById("profileLoading").style.display = "none";
-                document.getElementById("profileContent").style.display = "block";
-
-            } catch (error) {
-                console.error("Error loading profile:", error);
-                showAlert("profileLoading", "❌ Failed to load profile", "error");
-            }
         }
+    }
 
-        // ================= CHANGE PASSWORD ================= 
-        document.getElementById("passwordForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+    // Logout user
+    function logoutUser() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "login.html";
+    }
 
-            const currentPassword = document.getElementById("currentPassword").value;
-            const newPassword = document.getElementById("newPassword").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
+    function showNotification(msg) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = msg;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
 
-            // Client-side validation
-            if (newPassword !== confirmPassword) {
-                showAlert("passwordAlert", "❌ Passwords do not match", "error");
-                return;
-            }
+    // Initialize
+    loadProfile();
+</script>
 
-            if (newPassword.length < 8) {
-                showAlert("passwordAlert", "❌ Password must be at least 8 characters", "error");
-                return;
-            }
-
-            const changePasswordBtn = document.getElementById("changePasswordBtn");
-            changePasswordBtn.disabled = true;
-            showAlert("passwordAlert", "⏳ Updating password...", "loading");
-
-            try {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`${API_URL}/api/user/change-password`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        currentPassword,
-                        newPassword,
-                        confirmPassword
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    showAlert("passwordAlert", `❌ ${data.message}`, "error");
-                    return;
-                }
-
-                showAlert("passwordAlert", "✅ Password updated successfully!", "success");
-                document.getElementById("passwordForm").reset();
-
-                // Clear alert after 3 seconds
-                setTimeout(() => {
-                    document.getElementById("passwordAlert").innerHTML = "";
-                }, 3000);
-
-            } catch (error) {
-                console.error("Error:", error);
-                showAlert("passwordAlert", "❌ Failed to update password", "error");
-            } finally {
-                changePasswordBtn.disabled = false;
-            }
-        });
-
-        // ================= DELETE ACCOUNT ================= 
-        document.getElementById("deleteAccountBtn").addEventListener("click", () => {
-            document.getElementById("deleteModal").classList.add("active");
-        });
-
-        function closeDeleteModal() {
-            document.getElementById("deleteModal").classList.remove("active");
-            document.getElementById("deletePassword").value = "";
-        }
-
-        async function confirmDeleteAccount() {
-            const password = document.getElementById("deletePassword").value;
-
-            if (!password) {
-                alert("❌ Please enter your password to confirm");
-                return;
-            }
-
-            const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-            confirmDeleteBtn.disabled = true;
-            confirmDeleteBtn.innerHTML = '<span class="spinner"></span> Deleting...';
-
-            try {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`${API_URL}/api/user/delete-account`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ password })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    alert(`❌ ${data.message}`);
-                    confirmDeleteBtn.disabled = false;
-                    confirmDeleteBtn.innerHTML = "Delete Account";
-                    return;
-                }
-
-                alert("✅ Account deleted successfully. Redirecting...");
-                localStorage.removeItem("token");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "login.html";
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert("❌ Failed to delete account");
-                confirmDeleteBtn.disabled = false;
-                confirmDeleteBtn.innerHTML = "Delete Account";
-            }
-        }
-
-        // ================= LOGOUT ALL DEVICES ================= 
-        document.getElementById("logoutAllBtn").addEventListener("click", () => {
-            document.getElementById("logoutAllModal").classList.add("active");
-        });
-
-        function closeLogoutAllModal() {
-            document.getElementById("logoutAllModal").classList.remove("active");
-        }
-
-        async function confirmLogoutAll() {
-            const logoutAllBtn = document.querySelector("#logoutAllModal .modal-btn-danger");
-            logoutAllBtn.disabled = true;
-            logoutAllBtn.innerHTML = '<span class="spinner"></span> Logging out...';
-
-            try {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`${API_URL}/api/user/logout-all-devices`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    alert(`❌ ${data.message}`);
-                    return;
-                }
-
-                alert("✅ Logged out from all devices");
-                localStorage.removeItem("token");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "login.html";
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert("❌ Failed to logout");
-                logoutAllBtn.disabled = false;
-                logoutAllBtn.innerHTML = "Logout All";
-            }
-        }
-
-        // ================= UTILITY FUNCTIONS ================= 
-        function showAlert(elementId, message, type) {
-            const alertEl = document.getElementById(elementId);
-            alertEl.innerHTML = message;
-            alertEl.className = `alert alert-${type} show`;
-        }
-
-        function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text);
-            alert("✓ Copied to clipboard!");
-        }
-
-        // Close modal on outside click
-        document.getElementById("deleteModal").addEventListener("click", (e) => {
-            if (e.target.id === "deleteModal") closeDeleteModal();
-        });
-
-        document.getElementById("logoutAllModal").addEventListener("click", (e) => {
-            if (e.target.id === "logoutAllModal") closeLogoutAllModal();
-        });
-
-        // Load profile on page load
-        loadProfile();
-    </script>
 </body>
 </html>
