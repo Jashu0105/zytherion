@@ -3,6 +3,9 @@
 // Features: Auto-grow textarea, copy buttons, edit buttons,
 // typing indicator, token refresh, better error handling
 // ============================================================
+// Theme persistence - Load immediately
+const savedTheme = localStorage.getItem("theme") || "dark";
+document.documentElement.setAttribute("data-theme", savedTheme);
 
 /* ================= DOM ELEMENTS ================= */
 const chatContainer = document.getElementById("chat-container");
@@ -1309,3 +1312,206 @@ function searchAllSessions() {
 /* ============================================================================
    END PHASE 9 CODE - Add the above to your script.js
    ============================================================================ */
+
+// ============================================================================
+// SEARCH FUNCTIONS - WORKING VERSION
+// ============================================================================
+
+let chatSessions = JSON.parse(localStorage.getItem("zytherion_sessions") || "[]");
+let currentSessionId = localStorage.getItem("currentSessionId");
+
+// Search current session
+function performCurrentSearch(keyword, messageType, dateFrom, dateTo) {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession) {
+        showSearchNotification("❌ No active session to search");
+        return [];
+    }
+
+    const results = activeSession.messages.filter(msg => {
+        const matchesKeyword = !keyword || msg.text.toLowerCase().includes(keyword.toLowerCase());
+        const matchesType = messageType === 'all' || msg.sender === messageType;
+        return matchesKeyword && matchesType;
+    });
+
+    return results;
+}
+
+// Search all sessions
+function performGlobalSearch(keyword) {
+    const allResults = [];
+    chatSessions.forEach(session => {
+        const matches = session.messages.filter(msg => 
+            msg.text.toLowerCase().includes(keyword.toLowerCase())
+        );
+        if (matches.length > 0) {
+            allResults.push({
+                sessionTitle: session.title,
+                messages: matches
+            });
+        }
+    });
+    return allResults;
+}
+
+function showSearchNotification(msg) {
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(99, 102, 241, 0.2);
+        border: 1px solid rgba(99, 102, 241, 0.5);
+        color: #6366f1;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    notif.textContent = msg;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 3000);
+}
+
+// ============================================================================
+// EXPORT FUNCTIONS - KEEP YOUR EXISTING ONES
+// ============================================================================
+
+function exportAsJSON() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showSearchNotification("❌ No messages to export");
+        return;
+    }
+
+    const exportData = {
+        title: activeSession.title,
+        date: new Date().toLocaleString(),
+        messageCount: activeSession.messages.length,
+        messages: activeSession.messages
+    };
+
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zytherion-chat-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showSearchNotification("✅ Chat exported as JSON");
+}
+
+function exportAsTXT() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showSearchNotification("❌ No messages to export");
+        return;
+    }
+
+    let txtContent = `ZYTHERION AI - Chat Export\n`;
+    txtContent += `Title: ${activeSession.title}\n`;
+    txtContent += `Date: ${new Date().toLocaleString()}\n`;
+    txtContent += `Messages: ${activeSession.messages.length}\n`;
+    txtContent += `${'='.repeat(60)}\n\n`;
+
+    activeSession.messages.forEach((msg, index) => {
+        const sender = msg.sender === 'user' ? '👤 YOU' : '🤖 ZYTHERION';
+        txtContent += `[${index + 1}] ${sender}\n`;
+        txtContent += `${msg.text}\n`;
+        txtContent += `${'-'.repeat(60)}\n`;
+    });
+
+    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zytherion-chat-${Date.now()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showSearchNotification("✅ Chat exported as TXT");
+}
+
+function exportAsPDF() {
+    const activeSession = chatSessions.find(s => s.id === currentSessionId);
+    if (!activeSession || activeSession.messages.length === 0) {
+        showSearchNotification("❌ No messages to export");
+        return;
+    }
+
+    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        showSearchNotification("⏳ PDF library loading...");
+        return;
+    }
+
+    try {
+        const { jsPDF } = jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPosition = 20;
+        const lineHeight = 7;
+        const maxWidth = pageWidth - 20;
+
+        doc.setFontSize(16);
+        doc.text('Zytherion AI - Chat Export', 10, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.text(`Title: ${activeSession.title}`, 10, yPosition);
+        yPosition += 6;
+        doc.text(`Date: ${new Date().toLocaleString()}`, 10, yPosition);
+        yPosition += 6;
+        doc.text(`Total Messages: ${activeSession.messages.length}`, 10, yPosition);
+        yPosition += 10;
+
+        doc.setDrawColor(200);
+        doc.line(10, yPosition, pageWidth - 10, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(9);
+        activeSession.messages.forEach((msg, index) => {
+            const sender = msg.sender === 'user' ? '👤 You' : '🤖 Zytherion';
+            
+            if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+            }
+
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(209, 168, 92);
+            doc.text(`[${index + 1}] ${sender}`, 10, yPosition);
+            yPosition += lineHeight;
+
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            const lines = doc.splitTextToSize(msg.text, maxWidth - 10);
+            doc.text(lines, 15, yPosition);
+            yPosition += lines.length * lineHeight + 5;
+
+            doc.setDrawColor(220);
+            doc.line(10, yPosition, pageWidth - 10, yPosition);
+            yPosition += 5;
+        });
+
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text('Exported from Zytherion AI', 10, pageHeight - 10);
+
+        doc.save(`zytherion-chat-${Date.now()}.pdf`);
+        showSearchNotification("✅ Chat exported as PDF");
+
+    } catch (error) {
+        console.error("PDF export error:", error);
+        showSearchNotification("❌ PDF export failed");
+    }
+}

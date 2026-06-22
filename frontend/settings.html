@@ -56,7 +56,6 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 15px;
-            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
         }
 
@@ -118,7 +117,6 @@
             border: 1px solid var(--glass-border);
             border-radius: 15px;
             padding: 30px;
-            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
         }
 
@@ -241,6 +239,42 @@
             line-height: 1.6;
         }
 
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(4, 6, 10, 0.6);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .search-results {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .result-item {
+            background: rgba(209, 168, 92, 0.08);
+            border: 1px solid rgba(209, 168, 92, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -270,10 +304,6 @@
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
-            }
-
-            .tabs {
-                gap: 4px;
             }
 
             .tab-btn {
@@ -321,15 +351,15 @@
             <div class="settings-title">Display</div>
             
             <div class="setting-item">
-                <label for="themeSelect">Theme</label>
-                <select id="themeSelect" onchange="changeTheme(this.value)">
+                <label>Theme</label>
+                <select id="themeSelect" onchange="changeThemeAndApply(this.value)">
                     <option value="dark">🌙 Dark Mode</option>
                     <option value="light">☀️ Light Mode</option>
                 </select>
             </div>
 
             <div class="setting-item">
-                <label for="languageSelect">Language</label>
+                <label>Language</label>
                 <select id="languageSelect" onchange="changeLanguage(this.value)">
                     <option value="en">🇬🇧 English</option>
                     <option value="es">🇪🇸 Spanish</option>
@@ -344,17 +374,17 @@
             <div class="settings-title">Chat Behavior</div>
             
             <div class="setting-item">
-                <label for="notificationsToggle">Enable Notifications</label>
+                <label>Enable Notifications</label>
                 <input type="checkbox" id="notificationsToggle" onchange="saveSettings()">
             </div>
 
             <div class="setting-item">
-                <label for="autoDeleteToggle">Auto-Delete Chat History</label>
+                <label>Auto-Delete Chat History</label>
                 <input type="checkbox" id="autoDeleteToggle" onchange="saveSettings(); updateDeleteSection()">
             </div>
 
-            <div class="setting-item" id="deleteAfterDaysSection" hidden>
-                <label for="deleteAfterDays">Delete After (days)</label>
+            <div class="setting-item" id="deleteAfterDaysSection" style="display: none;">
+                <label>Delete After (days)</label>
                 <input type="number" id="deleteAfterDays" min="7" max="365" value="30" onchange="saveSettings()">
             </div>
         </div>
@@ -364,7 +394,7 @@
     <div id="tools" class="tab-content">
         <div class="settings-group">
             <div class="settings-title">📥 Export Chat</div>
-            <div class="info-box">Download your current conversation in your preferred format.</div>
+            <div class="info-box">Download your conversation in JSON, TXT, or PDF format.</div>
             
             <div class="button-group">
                 <button class="btn btn-primary" onclick="exportAsJSON()">📄 JSON</button>
@@ -374,12 +404,32 @@
         </div>
 
         <div class="settings-group">
-            <div class="settings-title">🔍 Search Chat</div>
-            <div class="info-box">Find messages using advanced search and filters.</div>
+            <div class="settings-title">🔍 Search Current Chat</div>
+            <div class="info-box">Search through your current conversation.</div>
+            
+            <input type="text" id="searchCurrentKeyword" class="search-input" placeholder="Enter keyword to search...">
             
             <div class="button-group">
-                <button class="btn btn-secondary" onclick="alert('Search Current feature - Available in main chat view')">🔍 Search Current</button>
-                <button class="btn btn-secondary" onclick="alert('Search All feature - Available in main chat view')">🔎 Search All</button>
+                <button class="btn btn-secondary" onclick="executeSearchCurrent()">🔍 Search</button>
+            </div>
+
+            <div id="currentSearchResults" class="search-results">
+                <div id="currentResultsContent"></div>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="settings-title">🔎 Search All Chats</div>
+            <div class="info-box">Search across all your conversations.</div>
+            
+            <input type="text" id="searchAllKeyword" class="search-input" placeholder="Enter keyword to search...">
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="executeSearchAll()">🔎 Search All</button>
+            </div>
+
+            <div id="allSearchResults" class="search-results">
+                <div id="allResultsContent"></div>
             </div>
         </div>
     </div>
@@ -415,7 +465,7 @@
 </div>
 
 <script>
-    // Load settings on page load
+    // Load theme and settings on page load
     function loadSettings() {
         const theme = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", theme);
@@ -437,17 +487,18 @@
         event.target.classList.add('active');
     }
 
-    function changeTheme(theme) {
+    function changeThemeAndApply(theme) {
         document.documentElement.setAttribute("data-theme", theme);
         localStorage.setItem("theme", theme);
-        showNotification("✓ Theme changed successfully");
+        showNotification("✓ Theme changed to " + (theme === "dark" ? "Dark Mode" : "Light Mode"));
     }
 
     function changeLanguage(lang) {
         const settings = JSON.parse(localStorage.getItem("userSettings") || '{}');
         settings.language = lang;
         localStorage.setItem("userSettings", JSON.stringify(settings));
-        showNotification("✓ Language changed successfully");
+        const langs = {en: "English", es: "Spanish", fr: "French", de: "German", hi: "Hindi"};
+        showNotification("✓ Language changed to " + langs[lang]);
     }
 
     function saveSettings() {
@@ -474,7 +525,114 @@
         setTimeout(() => notif.remove(), 3000);
     }
 
-    // Export functions
+    // SEARCH CURRENT CHAT
+    function executeSearchCurrent() {
+        const keyword = document.getElementById("searchCurrentKeyword").value.trim();
+        if (!keyword) {
+            showNotification("❌ Please enter a keyword");
+            return;
+        }
+
+        const chats = JSON.parse(localStorage.getItem("zytherion_sessions") || '[]');
+        if (chats.length === 0) {
+            showNotification("❌ No chats found");
+            return;
+        }
+
+        const lastChat = chats[chats.length - 1];
+        const results = lastChat.messages.filter(msg => 
+            msg.text.toLowerCase().includes(keyword.toLowerCase())
+        );
+
+        const resultsDiv = document.getElementById("currentSearchResults");
+        const resultsContent = document.getElementById("currentResultsContent");
+        resultsContent.innerHTML = '';
+
+        if (results.length === 0) {
+            resultsContent.innerHTML = `<p style="color: #64748b; text-align: center;">No results found</p>`;
+            resultsDiv.classList.add('show');
+            return;
+        }
+
+        let html = `<p style="color: #d1a85c; margin-bottom: 15px; font-weight: 600;">Found ${results.length} result(s)</p>`;
+        
+        results.forEach((msg, index) => {
+            const sender = msg.sender === 'user' ? '👤 You' : '🤖 AI';
+            let displayText = msg.text;
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            displayText = displayText.replace(regex, '<span style="background: rgba(209, 168, 92, 0.5); color: #fff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+            
+            html += `
+                <div class="result-item">
+                    <p style="color: #d1a85c; font-weight: 600; margin-bottom: 6px;">${sender}</p>
+                    <p>${displayText}</p>
+                </div>
+            `;
+        });
+        
+        resultsContent.innerHTML = html;
+        resultsDiv.classList.add('show');
+        showNotification(`✓ Found ${results.length} result(s)`);
+    }
+
+    // SEARCH ALL CHATS
+    function executeSearchAll() {
+        const keyword = document.getElementById("searchAllKeyword").value.trim();
+        if (!keyword) {
+            showNotification("❌ Please enter a keyword");
+            return;
+        }
+
+        const chats = JSON.parse(localStorage.getItem("zytherion_sessions") || '[]');
+        if (chats.length === 0) {
+            showNotification("❌ No chats found");
+            return;
+        }
+
+        const allResults = [];
+        chats.forEach(chat => {
+            const matches = chat.messages.filter(msg => 
+                msg.text.toLowerCase().includes(keyword.toLowerCase())
+            );
+            if (matches.length > 0) {
+                allResults.push({
+                    sessionTitle: chat.title,
+                    messages: matches
+                });
+            }
+        });
+
+        const resultsDiv = document.getElementById("allSearchResults");
+        const resultsContent = document.getElementById("allResultsContent");
+        resultsContent.innerHTML = '';
+
+        if (allResults.length === 0) {
+            resultsContent.innerHTML = `<p style="color: #64748b; text-align: center;">No results found in any chat</p>`;
+            resultsDiv.classList.add('show');
+            return;
+        }
+
+        let html = `<p style="color: #d1a85c; margin-bottom: 15px; font-weight: 600;">Found in ${allResults.length} chat(s)</p>`;
+        
+        allResults.forEach(result => {
+            html += `<h3 style="color: #d1a85c; font-size: 13px; margin: 15px 0 10px 0; font-weight: 600;">📌 ${result.sessionTitle}</h3>`;
+            
+            result.messages.forEach(msg => {
+                const sender = msg.sender === 'user' ? '👤' : '🤖';
+                let displayText = msg.text;
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                displayText = displayText.replace(regex, '<span style="background: rgba(209, 168, 92, 0.5); color: #fff; padding: 2px 4px; border-radius: 3px;">$1</span>');
+                
+                html += `<div class="result-item">${sender} ${displayText}</div>`;
+            });
+        });
+        
+        resultsContent.innerHTML = html;
+        resultsDiv.classList.add('show');
+        showNotification(`✓ Found in ${allResults.length} chat(s)`);
+    }
+
+    // EXPORT FUNCTIONS
     function exportAsJSON() {
         const chats = JSON.parse(localStorage.getItem("zytherion_sessions") || '[]');
         if (chats.length === 0) {
@@ -565,7 +723,7 @@
     }
 
     function changePasswordModal() {
-        alert("Opening password change...\n(Would redirect to profile page)");
+        showNotification("Open profile.html to change password");
     }
 
     function logoutAllDevices() {
@@ -585,7 +743,7 @@
         }
     }
 
-    // Initialize on page load
+    // Initialize on load
     loadSettings();
 </script>
 

@@ -6,6 +6,13 @@
     <title>Zytherion AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // LOAD THEME IMMEDIATELY BEFORE RENDERING
+        (function() {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        })();
+    </script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #070a13 0%, #02040a 100%);
@@ -53,8 +60,8 @@
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
-            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
@@ -124,6 +131,16 @@
             border-bottom: 1px solid var(--glass-border);
         }
 
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 19px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            user-select: none;
+        }
+
         .brand-title img {
             display: block;
             width: 28px;
@@ -137,17 +154,6 @@
         .brand-title span em {
             font-style: normal;
             color: var(--accent);
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 19px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         .ui-btn {
@@ -171,21 +177,6 @@
             border-color: var(--accent);
             box-shadow: 0 0 12px var(--accent-glow);
             color: var(--text-main);
-        }
-
-        .sidebar .ui-btn {
-            justify-content: center;
-        }
-
-        #newChatBtn {
-            margin-bottom: 16px;
-            font-weight: 600;
-            border-color: var(--accent);
-        }
-
-        #clearLogsBtn {
-            margin-top: auto;
-            font-size: 12px;
         }
 
         .chat-viewports {
@@ -240,8 +231,8 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 14px;
-            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
             align-items: flex-end;
             padding: 8px;
@@ -293,7 +284,6 @@
             font-size: 12px;
             color: var(--text-muted);
             pointer-events: none;
-            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -533,12 +523,12 @@
   <div class="sidebar">       
         <div class="sidebar-header">Local Workspaces</div>
         
-        <button class="ui-btn" id="newChatBtn" type="button">
+        <button class="ui-btn" id="newChatBtn" style="justify-content: center; margin-bottom: 16px; font-weight: 600; border-color: var(--accent);">
             + New Chat
         </button>
 
         <div class="local-history-container" id="localHistory"></div>
-        <button class="ui-btn" id="clearLogsBtn" type="button">
+        <button class="ui-btn" id="clearLogsBtn" style="margin-top: auto; justify-content: center; font-size: 12px;">
             Clear Local Logs
         </button>
     </div>
