@@ -1,8 +1,7 @@
-// ============================================================
-// ZYTHERION AI - IMPROVED SCRIPT.JS
-// Features: Auto-grow textarea, copy buttons, edit buttons,
-// typing indicator, token refresh, better error handling
-// ============================================================
+// ============================================================================
+// ZYTHERION AI - CLEAN SCRIPT.JS (NO DUPLICATES)
+// ============================================================================
+
 // Theme persistence - Load immediately
 const savedTheme = localStorage.getItem("theme") || "dark";
 document.documentElement.setAttribute("data-theme", savedTheme);
@@ -30,12 +29,11 @@ const TYPING_INDICATOR_TEXT = "Zytherion is thinking";
 /* ================= STATE MANAGEMENT ================= */
 let chatSessions = JSON.parse(localStorage.getItem("zytherion_sessions")) || [];
 let currentSessionId = localStorage.getItem("zytherion_current_session_id") || null;
-let isLoading = false; // Prevent duplicate messages
-let editingMessageIndex = null; // Track which message is being edited
+let isLoading = false;
+let editingMessageIndex = null;
 
 /* ================= INITIALIZATION ================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // Bootstrap sessions if needed
     if (chatSessions.length === 0 || !currentSessionId || !chatSessions.find(s => s.id === currentSessionId)) {
         createNewSession(false);
     }
@@ -43,31 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSidebarSessions();
     renderActiveChatLogs();
 
-    // Event listeners for message sending
     sendBtn.addEventListener("click", sendMessage);
     userInput.addEventListener("keydown", handleKeyPress);
-    
-    // Auto-grow textarea
     userInput.addEventListener("input", autoGrowTextarea);
     
     if (newChatBtn) {
         newChatBtn.addEventListener("click", () => createNewSession(true));
     }
 
-    // Check if token needs refresh on page load
     checkTokenExpiry();
 });
 
 /* ================= TEXTAREA AUTO-GROW ================= */
 function autoGrowTextarea() {
-    // Reset height to auto to get scrollHeight
     userInput.style.height = 'auto';
-    
-    // Set new height based on scrollHeight (capped at max-height)
     const newHeight = Math.min(userInput.scrollHeight, 120);
     userInput.style.height = newHeight + 'px';
-    
-    // Update character counter if it exists
     updateCharacterCounter();
 }
 
@@ -78,22 +67,19 @@ function updateCharacterCounter() {
         charCountEl.textContent = `${userInput.value.length}/${MESSAGE_MAX_LENGTH}`;
         
         if (remaining < 100) {
-            charCountEl.style.color = '#ef4444'; // Red warning
+            charCountEl.style.color = '#ef4444';
         } else {
-            charCountEl.style.color = '#64748b'; // Normal gray
+            charCountEl.style.color = '#64748b';
         }
     }
 }
 
 /* ================= KEYBOARD HANDLING ================= */
 function handleKeyPress(e) {
-    // Send message on Enter (without Shift)
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
-    // Allow new line on Shift + Enter
-    // (default behavior, no need to handle)
 }
 
 /* ================= SESSION MANAGEMENT ================= */
@@ -127,18 +113,14 @@ function renderActiveChatLogs() {
     
     const activeSession = chatSessions.find(s => s.id === currentSessionId);
     
-    // Default greeting if no messages
     if (!activeSession || activeSession.messages.length === 0) {
         appendChatBubbleUI(
-            `🚀 ZYTHERION: Think Bigger. Build Faster.
-The next-gen AI powered by adaptive reasoning and limitless creativity. Your imagination is the only limit.
-➜ 🧠 Enter the future ✨`,
+            `🚀 ZYTHERION: Think Bigger. Build Faster.\nThe next-gen AI powered by adaptive reasoning and limitless creativity. Your imagination is the only limit.\n➜ 🧠 Enter the future ✨`,
             "bot"
         );
         return;
     }
 
-    // Render all messages
     activeSession.messages.forEach((item, index) => {
         appendChatBubbleUI(item.text, item.sender, index);
     });
@@ -151,14 +133,12 @@ function appendChatBubbleUI(text, sender, messageIndex = null) {
     msgDiv.classList.add("message", sender);
     msgDiv.setAttribute("data-message-index", messageIndex);
     
-    // Create text content
     const textContent = document.createElement("div");
     textContent.style.wordWrap = "break-word";
     textContent.style.whiteSpace = "pre-wrap";
     textContent.innerText = text;
     msgDiv.appendChild(textContent);
     
-    // Add action buttons
     if (sender === "bot") {
         addCopyButton(msgDiv, text);
     } else if (sender === "user") {
@@ -171,7 +151,6 @@ function appendChatBubbleUI(text, sender, messageIndex = null) {
     return msgDiv;
 }
 
-// Add Copy + Edit buttons for user messages
 function addUserActionButtons(msgDiv, text, messageIndex) {
     const buttonContainer = document.createElement("div");
     buttonContainer.style.cssText = `
@@ -181,7 +160,6 @@ function addUserActionButtons(msgDiv, text, messageIndex) {
         flex-wrap: wrap;
     `;
     
-    // Edit button
     const editBtn = document.createElement("button");
     editBtn.innerHTML = "✏️ Edit";
     editBtn.style.cssText = `
@@ -217,7 +195,6 @@ function addUserActionButtons(msgDiv, text, messageIndex) {
         editBtn.style.borderColor = "rgba(16, 185, 129, 0.5)";
     };
     
-    // Copy button
     const copyBtn = document.createElement("button");
     copyBtn.innerHTML = "📋 Copy";
     copyBtn.style.cssText = `
@@ -256,8 +233,6 @@ function addUserActionButtons(msgDiv, text, messageIndex) {
             }, 2000);
         } catch (err) {
             console.error("Copy failed:", err);
-            copyBtn.innerHTML = "❌ Copy failed";
-            setTimeout(() => copyBtn.innerHTML = "📋 Copy", 2000);
         }
     };
     
@@ -266,7 +241,6 @@ function addUserActionButtons(msgDiv, text, messageIndex) {
     msgDiv.appendChild(buttonContainer);
 }
 
-// Copy button for bot messages
 function addCopyButton(msgDiv, text) {
     const buttonContainer = document.createElement("div");
     buttonContainer.style.cssText = `
@@ -314,8 +288,6 @@ function addCopyButton(msgDiv, text) {
             }, 2000);
         } catch (err) {
             console.error("Copy failed:", err);
-            copyBtn.innerHTML = "❌ Copy failed";
-            setTimeout(() => copyBtn.innerHTML = "📋 Copy", 2000);
         }
     };
     
@@ -399,11 +371,10 @@ function checkTokenExpiry() {
             throw new Error("Invalid token payload");
         }
 
-        const expiryTime = payload.exp * 1000; // Convert to milliseconds
+        const expiryTime = payload.exp * 1000;
         const now = Date.now();
         const timeUntilExpiry = expiryTime - now;
         
-        // If token expires in less than 5 minutes, refresh it
         if (timeUntilExpiry < 5 * 60 * 1000) {
             refreshAccessToken();
         }
@@ -417,7 +388,7 @@ async function refreshAccessToken() {
         const refreshToken = localStorage.getItem("refreshToken");
         
         if (!refreshToken) {
-            console.warn("⚠️ No refresh token found. Please login again.");
+            console.warn("⚠️ No refresh token found");
             window.location.href = "login.html";
             return;
         }
@@ -433,11 +404,8 @@ async function refreshAccessToken() {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem("token", data.accessToken);
-            console.log("✅ Access token refreshed successfully");
+            console.log("✅ Access token refreshed");
         } else {
-            console.warn("⚠️ Token refresh failed. Please login again.");
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
             window.location.href = "login.html";
         }
     } catch (error) {
@@ -449,7 +417,6 @@ async function refreshAccessToken() {
 async function sendMessage() {
     const message = userInput.value.trim();
     
-    // Validation
     if (!message) {
         showErrorNotification("Please enter a message");
         return;
@@ -468,23 +435,20 @@ async function sendMessage() {
     let activeSession = chatSessions.find(s => s.id === currentSessionId);
     if (!activeSession) return;
 
-    // Clear greeting if this is the first message
     if (activeSession.messages.length === 0) {
         chatContainer.innerHTML = "";
         activeSession.title = message.length > 28 ? message.substring(0, 25) + "..." : message;
     }
 
-    // Add user message
     activeSession.messages.push({ text: message, sender: "user" });
     appendChatBubbleUI(message, "user", activeSession.messages.length - 1);
     userInput.value = "";
-    userInput.style.height = 'auto'; // Reset textarea height
+    userInput.style.height = 'auto';
     updateCharacterCounter();
-    editingMessageIndex = null; // Reset editing state
+    editingMessageIndex = null;
     saveStateToStorage();
     renderSidebarSessions();
 
-    // Show thinking state with animated dots
     const loadingDiv = appendChatBubbleUI(TYPING_INDICATOR_TEXT, "bot");
     loadingDiv.style.opacity = "0.7";
     
@@ -497,7 +461,6 @@ async function sendMessage() {
     isLoading = true;
 
     try {
-        // Get token
         const token = localStorage.getItem("token");
         if (!token) {
             clearInterval(dotInterval);
@@ -506,10 +469,8 @@ async function sendMessage() {
             return;
         }
 
-        // Check if token needs refresh before sending
         checkTokenExpiry();
 
-        // Send message to backend
         const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: {
@@ -519,9 +480,7 @@ async function sendMessage() {
             body: JSON.stringify({ message: message })
         });
 
-        // Handle token expiry
         if (response.status === 401 || response.status === 403) {
-            console.warn("⚠️ Token expired or invalid");
             localStorage.removeItem("token");
             clearInterval(dotInterval);
             loadingDiv.remove();
@@ -536,7 +495,6 @@ async function sendMessage() {
 
         const data = await response.json();
         
-        // Validate response
         if (!data || typeof data !== 'object') {
             throw new Error("Invalid response format from server");
         }
@@ -547,11 +505,9 @@ async function sendMessage() {
             throw new Error("No valid reply received from AI");
         }
 
-        // Remove loading indicator
         clearInterval(dotInterval);
         loadingDiv.remove();
 
-        // Add bot response
         activeSession.messages.push({ text: botReplyText, sender: "bot" });
         appendChatBubbleUI(botReplyText, "bot", activeSession.messages.length - 1);
         saveStateToStorage();
@@ -599,14 +555,12 @@ function showErrorNotification(message) {
     errorDiv.textContent = "❌ " + message;
     document.body.appendChild(errorDiv);
     
-    // Auto remove after 4 seconds
     setTimeout(() => {
         errorDiv.style.animation = "slideOut 0.3s ease";
         setTimeout(() => errorDiv.remove(), 300);
     }, 4000);
 }
 
-// Add CSS animations for notifications
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -645,11 +599,9 @@ clearLogsBtn.addEventListener("click", () => {
         showErrorNotification("All chat history cleared ✓");
     }
 });
-/* ============================================================================
-   PHASE 8: MESSAGE EXPORT - ADD THIS TO YOUR SCRIPT.JS
-   ============================================================================ */
 
-// Export current chat as JSON
+/* ================= EXPORT FUNCTIONS (ONE VERSION ONLY) ================= */
+
 function exportAsJSON() {
     const activeSession = chatSessions.find(s => s.id === currentSessionId);
     if (!activeSession || activeSession.messages.length === 0) {
@@ -674,11 +626,9 @@ function exportAsJSON() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
     showErrorNotification("✅ Chat exported as JSON");
 }
 
-// Export current chat as TXT
 function exportAsTXT() {
     const activeSession = chatSessions.find(s => s.id === currentSessionId);
     if (!activeSession || activeSession.messages.length === 0) {
@@ -708,11 +658,9 @@ function exportAsTXT() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
     showErrorNotification("✅ Chat exported as TXT");
 }
 
-// Export current chat as PDF (using jsPDF)
 function exportAsPDF() {
     const activeSession = chatSessions.find(s => s.id === currentSessionId);
     if (!activeSession || activeSession.messages.length === 0) {
@@ -720,7 +668,6 @@ function exportAsPDF() {
         return;
     }
 
-    // Check if jsPDF is loaded
     if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
         showErrorNotification("PDF library loading... Please try again in a moment");
         return;
@@ -740,7 +687,6 @@ function exportAsPDF() {
         const lineHeight = 7;
         const maxWidth = pageWidth - 20;
 
-        // Header
         doc.setFontSize(16);
         doc.text('Zytherion AI - Chat Export', 10, yPosition);
         yPosition += 10;
@@ -757,37 +703,31 @@ function exportAsPDF() {
         doc.line(10, yPosition, pageWidth - 10, yPosition);
         yPosition += 10;
 
-        // Messages
         doc.setFontSize(9);
         activeSession.messages.forEach((msg, index) => {
             const sender = msg.sender === 'user' ? '👤 You' : '🤖 Zytherion';
             
-            // Check if we need a new page
             if (yPosition > pageHeight - 20) {
                 doc.addPage();
                 yPosition = 20;
             }
 
-            // Sender label
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(209, 168, 92); // Gold color
+            doc.setTextColor(209, 168, 92);
             doc.text(`[${index + 1}] ${sender}`, 10, yPosition);
             yPosition += lineHeight;
 
-            // Message text
             doc.setFont(undefined, 'normal');
             doc.setTextColor(0, 0, 0);
             const lines = doc.splitTextToSize(msg.text, maxWidth - 10);
             doc.text(lines, 15, yPosition);
             yPosition += lines.length * lineHeight + 5;
 
-            // Separator
             doc.setDrawColor(220);
             doc.line(10, yPosition, pageWidth - 10, yPosition);
             yPosition += 5;
         });
 
-        // Footer
         doc.setFontSize(8);
         doc.setTextColor(150);
         doc.text('Exported from Zytherion AI', 10, pageHeight - 10);
@@ -801,7 +741,6 @@ function exportAsPDF() {
     }
 }
 
-// Show export menu
 function showExportMenu() {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -907,18 +846,10 @@ function showExportMenu() {
     };
 }
 
-/* ============================================================================
-   END PHASE 8 CODE - Add the above to your script.js
-   ============================================================================ */
-   /* ============================================================================
-   PHASE 9: ADVANCED SEARCH - ADD THIS TO YOUR SCRIPT.JS
-   ============================================================================ */
+/* ================= SEARCH FUNCTIONS (ONE VERSION ONLY) ================= */
 
-// Search state
 let searchResults = [];
-let currentSearchQuery = "";
 
-// Show advanced search modal
 function showAdvancedSearch() {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -953,8 +884,6 @@ function showAdvancedSearch() {
         <h2 style="color: #d1a85c; margin-bottom: 20px; font-size: 24px;">🔍 Advanced Search</h2>
         
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            
-            <!-- Keyword Search -->
             <div>
                 <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Keyword</label>
                 <input type="text" id="searchKeyword" placeholder="Search messages..." style="
@@ -970,7 +899,6 @@ function showAdvancedSearch() {
                 " onkeyup="this.style.borderColor = this.value ? 'rgba(209, 168, 92, 0.5)' : 'rgba(209, 168, 92, 0.2)'">
             </div>
 
-            <!-- Filter by Message Type -->
             <div>
                 <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Message Type</label>
                 <div style="display: flex; gap: 10px;">
@@ -989,40 +917,6 @@ function showAdvancedSearch() {
                 </div>
             </div>
 
-            <!-- Date Range Filter -->
-            <div>
-                <label style="display: block; color: #d1a85c; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Date Range</label>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="display: block; color: #64748b; margin-bottom: 5px; font-size: 12px;">From</label>
-                        <input type="date" id="dateFrom" style="
-                            width: 100%;
-                            padding: 10px 12px;
-                            background: rgba(4, 6, 10, 0.6);
-                            border: 1px solid rgba(209, 168, 92, 0.2);
-                            border-radius: 8px;
-                            color: #f8fafc;
-                            font-size: 13px;
-                            outline: none;
-                        ">
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="display: block; color: #64748b; margin-bottom: 5px; font-size: 12px;">To</label>
-                        <input type="date" id="dateTo" style="
-                            width: 100%;
-                            padding: 10px 12px;
-                            background: rgba(4, 6, 10, 0.6);
-                            border: 1px solid rgba(209, 168, 92, 0.2);
-                            border-radius: 8px;
-                            color: #f8fafc;
-                            font-size: 13px;
-                            outline: none;
-                        ">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Buttons -->
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button id="searchBtn" style="
                     flex: 1;
@@ -1033,7 +927,6 @@ function showAdvancedSearch() {
                     color: #02040a;
                     cursor: pointer;
                     font-weight: 600;
-                    transition: all 0.2s;
                 ">🔍 Search</button>
                 
                 <button id="closeSearch" style="
@@ -1045,11 +938,9 @@ function showAdvancedSearch() {
                     color: inherit;
                     cursor: pointer;
                     font-weight: 600;
-                    transition: all 0.2s;
                 ">Cancel</button>
             </div>
 
-            <!-- Results Display -->
             <div id="searchResults" style="
                 background: rgba(255, 255, 255, 0.02);
                 border: 1px solid rgba(209, 168, 92, 0.1);
@@ -1067,13 +958,8 @@ function showAdvancedSearch() {
     modal.appendChild(content);
     document.body.appendChild(modal);
 
-    // Set today's date as default end date
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('dateTo').value = today;
-
-    // Set a week ago as default start date
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    document.getElementById('dateFrom').value = weekAgo;
 
     document.getElementById('searchBtn').onclick = performSearch;
     document.getElementById('closeSearch').onclick = () => modal.remove();
@@ -1083,13 +969,9 @@ function showAdvancedSearch() {
     };
 }
 
-// Perform the search
 function performSearch() {
     const keyword = document.getElementById('searchKeyword').value.toLowerCase();
     const messageType = document.querySelector('input[name="messageType"]:checked').value;
-    const dateFrom = new Date(document.getElementById('dateFrom').value || '2000-01-01');
-    const dateTo = new Date(document.getElementById('dateTo').value || '2099-12-31');
-    dateTo.setHours(23, 59, 59); // Include entire last day
 
     const activeSession = chatSessions.find(s => s.id === currentSessionId);
     if (!activeSession) {
@@ -1097,26 +979,16 @@ function performSearch() {
         return;
     }
 
-    // Filter messages
     searchResults = activeSession.messages.filter(msg => {
-        // Check keyword match
         const matchesKeyword = !keyword || msg.text.toLowerCase().includes(keyword);
-        
-        // Check message type
         const matchesType = messageType === 'all' || msg.sender === messageType;
-        
-        // Check date range (assume messages were created during this session)
-        const messageDate = new Date(activeSession.timestamp || Date.now());
-        const matchesDate = messageDate >= dateFrom && messageDate <= dateTo;
-        
-        return matchesKeyword && matchesType && matchesDate;
+        return matchesKeyword && matchesType;
     });
 
-    displaySearchResults(keyword, messageType);
+    displaySearchResults(keyword);
 }
 
-// Display search results
-function displaySearchResults(keyword, messageType) {
+function displaySearchResults(keyword) {
     const resultsDiv = document.getElementById('searchResults');
     const resultsContent = document.getElementById('resultsContent');
     
@@ -1130,11 +1002,10 @@ function displaySearchResults(keyword, messageType) {
 
     let html = `<p style="color: #d1a85c; margin-bottom: 15px; font-weight: 600;">Found ${searchResults.length} result(s)</p>`;
     
-    searchResults.forEach((msg, index) => {
+    searchResults.forEach((msg) => {
         const sender = msg.sender === 'user' ? '👤 You' : '🤖 AI';
         let displayText = msg.text;
         
-        // Highlight keyword if provided
         if (keyword) {
             const regex = new RegExp(`(${keyword})`, 'gi');
             displayText = displayText.replace(regex, '<span style="background: rgba(209, 168, 92, 0.5); color: #fff; padding: 2px 4px; border-radius: 3px;">$1</span>');
@@ -1158,7 +1029,6 @@ function displaySearchResults(keyword, messageType) {
     resultsDiv.style.display = 'block';
 }
 
-// Search in all sessions
 function searchAllSessions() {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -1201,8 +1071,7 @@ function searchAllSessions() {
             font-size: 14px;
             outline: none;
             margin-bottom: 15px;
-            transition: all 0.2s;
-        " onkeyup="this.style.borderColor = this.value ? 'rgba(209, 168, 92, 0.5)' : 'rgba(209, 168, 92, 0.2)'">
+        ">
 
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
             <button id="globalSearchBtn" style="
@@ -1309,209 +1178,6 @@ function searchAllSessions() {
     };
 }
 
-/* ============================================================================
-   END PHASE 9 CODE - Add the above to your script.js
-   ============================================================================ */
-
 // ============================================================================
-// SEARCH FUNCTIONS - WORKING VERSION
+// END OF SCRIPT - NO DUPLICATES!
 // ============================================================================
-
-let chatSessions = JSON.parse(localStorage.getItem("zytherion_sessions") || "[]");
-let currentSessionId = localStorage.getItem("currentSessionId");
-
-// Search current session
-function performCurrentSearch(keyword, messageType, dateFrom, dateTo) {
-    const activeSession = chatSessions.find(s => s.id === currentSessionId);
-    if (!activeSession) {
-        showSearchNotification("❌ No active session to search");
-        return [];
-    }
-
-    const results = activeSession.messages.filter(msg => {
-        const matchesKeyword = !keyword || msg.text.toLowerCase().includes(keyword.toLowerCase());
-        const matchesType = messageType === 'all' || msg.sender === messageType;
-        return matchesKeyword && matchesType;
-    });
-
-    return results;
-}
-
-// Search all sessions
-function performGlobalSearch(keyword) {
-    const allResults = [];
-    chatSessions.forEach(session => {
-        const matches = session.messages.filter(msg => 
-            msg.text.toLowerCase().includes(keyword.toLowerCase())
-        );
-        if (matches.length > 0) {
-            allResults.push({
-                sessionTitle: session.title,
-                messages: matches
-            });
-        }
-    });
-    return allResults;
-}
-
-function showSearchNotification(msg) {
-    const notif = document.createElement('div');
-    notif.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(99, 102, 241, 0.2);
-        border: 1px solid rgba(99, 102, 241, 0.5);
-        color: #6366f1;
-        padding: 12px 20px;
-        border-radius: 8px;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-    `;
-    notif.textContent = msg;
-    document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 3000);
-}
-
-// ============================================================================
-// EXPORT FUNCTIONS - KEEP YOUR EXISTING ONES
-// ============================================================================
-
-function exportAsJSON() {
-    const activeSession = chatSessions.find(s => s.id === currentSessionId);
-    if (!activeSession || activeSession.messages.length === 0) {
-        showSearchNotification("❌ No messages to export");
-        return;
-    }
-
-    const exportData = {
-        title: activeSession.title,
-        date: new Date().toLocaleString(),
-        messageCount: activeSession.messages.length,
-        messages: activeSession.messages
-    };
-
-    const jsonStr = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `zytherion-chat-${Date.now()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    showSearchNotification("✅ Chat exported as JSON");
-}
-
-function exportAsTXT() {
-    const activeSession = chatSessions.find(s => s.id === currentSessionId);
-    if (!activeSession || activeSession.messages.length === 0) {
-        showSearchNotification("❌ No messages to export");
-        return;
-    }
-
-    let txtContent = `ZYTHERION AI - Chat Export\n`;
-    txtContent += `Title: ${activeSession.title}\n`;
-    txtContent += `Date: ${new Date().toLocaleString()}\n`;
-    txtContent += `Messages: ${activeSession.messages.length}\n`;
-    txtContent += `${'='.repeat(60)}\n\n`;
-
-    activeSession.messages.forEach((msg, index) => {
-        const sender = msg.sender === 'user' ? '👤 YOU' : '🤖 ZYTHERION';
-        txtContent += `[${index + 1}] ${sender}\n`;
-        txtContent += `${msg.text}\n`;
-        txtContent += `${'-'.repeat(60)}\n`;
-    });
-
-    const blob = new Blob([txtContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `zytherion-chat-${Date.now()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    showSearchNotification("✅ Chat exported as TXT");
-}
-
-function exportAsPDF() {
-    const activeSession = chatSessions.find(s => s.id === currentSessionId);
-    if (!activeSession || activeSession.messages.length === 0) {
-        showSearchNotification("❌ No messages to export");
-        return;
-    }
-
-    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        showSearchNotification("⏳ PDF library loading...");
-        return;
-    }
-
-    try {
-        const { jsPDF } = jspdf;
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        let yPosition = 20;
-        const lineHeight = 7;
-        const maxWidth = pageWidth - 20;
-
-        doc.setFontSize(16);
-        doc.text('Zytherion AI - Chat Export', 10, yPosition);
-        yPosition += 10;
-
-        doc.setFontSize(10);
-        doc.text(`Title: ${activeSession.title}`, 10, yPosition);
-        yPosition += 6;
-        doc.text(`Date: ${new Date().toLocaleString()}`, 10, yPosition);
-        yPosition += 6;
-        doc.text(`Total Messages: ${activeSession.messages.length}`, 10, yPosition);
-        yPosition += 10;
-
-        doc.setDrawColor(200);
-        doc.line(10, yPosition, pageWidth - 10, yPosition);
-        yPosition += 10;
-
-        doc.setFontSize(9);
-        activeSession.messages.forEach((msg, index) => {
-            const sender = msg.sender === 'user' ? '👤 You' : '🤖 Zytherion';
-            
-            if (yPosition > pageHeight - 20) {
-                doc.addPage();
-                yPosition = 20;
-            }
-
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(209, 168, 92);
-            doc.text(`[${index + 1}] ${sender}`, 10, yPosition);
-            yPosition += lineHeight;
-
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor(0, 0, 0);
-            const lines = doc.splitTextToSize(msg.text, maxWidth - 10);
-            doc.text(lines, 15, yPosition);
-            yPosition += lines.length * lineHeight + 5;
-
-            doc.setDrawColor(220);
-            doc.line(10, yPosition, pageWidth - 10, yPosition);
-            yPosition += 5;
-        });
-
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text('Exported from Zytherion AI', 10, pageHeight - 10);
-
-        doc.save(`zytherion-chat-${Date.now()}.pdf`);
-        showSearchNotification("✅ Chat exported as PDF");
-
-    } catch (error) {
-        console.error("PDF export error:", error);
-        showSearchNotification("❌ PDF export failed");
-    }
-}
